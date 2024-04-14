@@ -14,6 +14,18 @@ public interface Function3<A1,A2,A3,R> {
         return (a1,a2,a3) -> after.apply(apply(a1, a2, a3));
     }
 
+    default Function2<A2,A3,R> curry1(final A1 a1) {
+        return (a2,a3)->this.apply(a1,a2,a3);
+    }
+
+    default Function2<A1,A3,R> curry2(final A2 a2) {
+        return (a1,a3)->this.apply(a1,a2,a3);
+    }
+
+    default Function2<A1,A2,R> curry3(final A3 a3) {
+        return (a1,a2)->this.apply(a1,a2,a3);
+    }
+
     static <A1,A2,A3,R> Function3<A1,A2,A3,R> dispatch(ToInt3Function<? super A1,? super A2,? super A3> dispatchFunction, Function3<? super A1,? super A2,? super A3, R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function3 dispatch function is null");
         Objects.requireNonNull(functions,"Function3 expects a collection of triple argument functions");
@@ -43,4 +55,7 @@ public interface Function3<A1,A2,A3,R> {
         };
     }
 
+    static <A1,A2,A3,R> Function3<A1,A2,A3,R> of(Function3<A1,A2,A3,R> f) {
+        return f;
+    }
 }
