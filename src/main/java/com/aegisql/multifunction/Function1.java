@@ -26,7 +26,7 @@ public interface Function1 <A1,R> extends Function<A1,R> {
         };
     }
 
-    default Supplier<R> applyArg1(final A1 a1) {
+    default SupplierExt<R> applyArg1(final A1 a1) {
         return ()->this.apply(a1);
     }
 
