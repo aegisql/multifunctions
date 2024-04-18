@@ -43,11 +43,11 @@ class Function3Test {
 
     @Test
     public void curryTest() {
-        String s1 = Function3.of(this::mul).curry1(10).curry1(20).apply(5);
+        String s1 = Function3.of(this::mul).applyArg1(10).applyArg1(20).apply(5);
         System.out.println(s1);
-        String s2 = Function3.of(this::mul).curry2(10).curry1(20).apply(5);
+        String s2 = Function3.of(this::mul).applyArg2(10).applyArg1(20).apply(5);
         System.out.println(s2);
-        String s3 = Function3.of(this::mul).curry3(10).curry2(20).apply(5);
+        String s3 = Function3.of(this::mul).applyArg3(10).applyArg2(20).apply(5);
         System.out.println(s3);
     }
 

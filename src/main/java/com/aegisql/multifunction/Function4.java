@@ -7,6 +7,10 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface Function4<A1,A2,A3,A4,R> {
 
+    @FunctionalInterface
+    interface Throwing<A1,A2,A3,A4,R>{ R apply(A1 a1, A2 a2, A3 a3, A4 a4) throws Exception; }
+
+
     R apply(A1 arg1, A2 arg2, A3 arg3, A4 arg4);
 
     default <V> Function4<A1, A2, A3, A4, V> andThen(Function<? super R, ? extends V> after) {
@@ -14,6 +18,7 @@ public interface Function4<A1,A2,A3,A4,R> {
         return (a1,a2,a3,a4) -> after.apply(apply(a1, a2, a3, a4));
     }
 
+    static Function4<Object,Object,Object,Object,String> toString = (a1,a2,a3,a4)->"(%s, %s, %s, %s)".formatted(a1,a2,a3,a4);
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> dispatch(ToInt4Function<? super A1,? super A2,? super A3, ? super A4> dispatchFunction, Function4<? super A1,? super A2,? super A3, ? super A4, R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function4 dispatch function is null");
         Objects.requireNonNull(functions,"Function4 expects a collection of four argument functions");

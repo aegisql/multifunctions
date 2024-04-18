@@ -6,6 +6,9 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface Function5<A1,A2,A3,A4,A5,R> {
 
+    @FunctionalInterface
+    interface Throwing<A1,A2,A3,A4,A5,R>{ R apply(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) throws Exception; }
+
     R apply(A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5);
 
     default <V> Function5<A1, A2, A3, A4, A5, V> andThen(Function<? super R, ? extends V> after) {
@@ -13,6 +16,7 @@ public interface Function5<A1,A2,A3,A4,A5,R> {
         return (a1,a2,a3,a4,a5) -> after.apply(apply(a1, a2, a3, a4, a5));
     }
 
+    static Function5<Object,Object,Object,Object,Object,String> toString = (a1,a2,a3,a4,a5)->"(%s, %s, %s, %s, %s)".formatted(a1,a2,a3,a4,a5);
     static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> dispatch(ToInt5Function<? super A1,? super A2,? super A3, ? super A4, ? super A5> dispatchFunction, Function5<? super A1,? super A2,? super A3, ? super A4, ? super A5, R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function5 dispatch function is null");
         Objects.requireNonNull(functions,"Function5 expects a collection of five argument functions");

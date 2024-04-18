@@ -3,11 +3,31 @@ package com.aegisql.multifunction;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class Function1Test {
+
+    public class MyRuntimeException extends RuntimeException {
+        public MyRuntimeException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public class IsNull extends Exception{ }
+    public class IsZero extends Exception{
+        public IsZero(String argIsZero) {
+            super(argIsZero);
+        }
+    }
+
+    public class NotANumber extends Exception{
+        public NotANumber(String notANumber) {
+            super(notANumber);
+        }
+    }
 
     public String greetEng(String name) {
         return "Hello, "+name;
@@ -31,13 +51,85 @@ class Function1Test {
 
     public static final String russianCyrillicPattern = "[\\u0410-\\u044F\\u0401\\u0451]+";
 
+    public String div(String num) throws IsNull, IsZero, NotANumber {
+        if(num==null) throw new IsNull();
+        int x=0;
+        try {
+            x = Integer.parseInt(num);
+        } catch (Exception e) {
+            throw new NotANumber("not a number");
+        }
+        if(x==0) {
+            throw new IsZero("arg is zero");
+        }
+        return ""+(100/x);
+    }
+
+    @Test
+    public void testThrowing() {
+        Function1<String, String> div = Function1.throwing(this::div);
+        Function1<String, Optional<String>> divOptional = div.optional();
+        String s = div.apply("10");
+        System.out.println(s);
+        try {
+            div.apply("0");
+            fail();
+        } catch (RuntimeException e){
+            assertEquals("arg is zero; arg:(0)",e.getMessage());
+        }
+
+        try {
+            div.apply(null);
+            fail();
+        } catch (RuntimeException e){
+            assertEquals("IsNull; arg:(null)",e.getMessage());
+        }
+
+
+        assertThrows(RuntimeException.class,()->div.apply(null));
+        assertThrows(RuntimeException.class,()->div.apply("0"));
+        assertThrows(RuntimeException.class,()->div.apply("test"));
+
+        Optional<String> optional = divOptional.apply("20");
+        assertFalse(optional.isEmpty());
+        assertEquals("5",optional.get());
+        assertTrue(divOptional.apply(null).isEmpty());
+        assertTrue(divOptional.apply("0").isEmpty());
+        assertTrue(divOptional.apply("NAN").isEmpty());
+
+        Function1<String, Optional<String>> optional2 = div.optional("ERROR");
+        Optional<String> failed = optional2.apply("fail");
+        assertEquals("ERROR",failed.get());
+
+    }
+
+    @Test
+    public void testThrowingWithMessage() {
+
+        Function1<String, String> div = Function1.throwing(this::div,"division failed: arg=({1}) message: {0}",MyRuntimeException::new);
+
+        String s = div.apply("10");
+        System.out.println(s);
+        try {
+            div.apply("0");
+            fail();
+        } catch (RuntimeException e){
+            assertEquals("division failed: arg=(0) message: arg is zero",e.getMessage());
+        }
+
+        assertThrows(MyRuntimeException.class,()->div.apply(null));
+        assertThrows(MyRuntimeException.class,()->div.apply("0"));
+        assertThrows(MyRuntimeException.class,()->div.apply("test"));
+
+    }
+
     @Test
     public void function1Test() {
 
         Function<String, String> dispatch = Function1.dispatch(
                 arg1 -> arg1.matches(russianCyrillicPattern),
                 this::greetRus,
-                this::greetEng).andThen(s->s+"!");
+                this::greetEng).beforeApply(s->System.out.println("Before: "+s)).afterApply(s->System.out.println("complete")).andThen(s->s+"!");
 
         System.out.println(dispatch.apply("Mike"));
         System.out.println(dispatch.apply("Миша"));

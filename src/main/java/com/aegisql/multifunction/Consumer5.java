@@ -6,6 +6,9 @@ import java.util.Objects;
 @FunctionalInterface
 public interface Consumer5<A1,A2,A3,A4,A5> {
 
+    @FunctionalInterface
+    interface Throwing<A1,A2,A3,A4,A5>{ void accept(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) throws Exception; }
+
     void accept(A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5);
 
     default Consumer5<A1, A2, A3, A4, A5> andThen(Consumer5<? super A1, ? super A2, ? super A3, ? super A4, ? super A5> after) {

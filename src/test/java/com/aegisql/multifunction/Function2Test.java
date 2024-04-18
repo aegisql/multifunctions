@@ -111,12 +111,12 @@ class Function2Test {
     public void testCurry1() {
         Function2<String, Integer, String> greet = Function2.of(this::greet);
         System.out.println(greet.apply("X",5));
-        Function1<Integer, String> xEq = greet.curry1("X");
+        Function1<Integer, String> xEq = greet.applyArg1("X");
         String val = xEq.apply(100);
         System.out.println(val);
         assertEquals("X=100",val);
 
-        Function1<String, String> yEq = greet.curry2(200);
+        Function1<String, String> yEq = greet.applyArg2(200);
         String y = yEq.apply("Y");
         System.out.println(y);
         assertEquals("Y=200",y);

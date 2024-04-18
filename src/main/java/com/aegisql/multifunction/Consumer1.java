@@ -6,9 +6,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
-public interface Consumer1 {
+public interface Consumer1<A1> extends Consumer<A1> {
 
-    static <A1> Consumer<A1> dispatch(ToIntFunction<? super A1> dispatchFunction, Consumer<? super A1>... consumers) {
+    @FunctionalInterface
+    interface Throwing<A1>{ void accept(A1 a1) throws Exception; }
+
+    default Runnable acceptArg1(final A1 a1) {
+        return ()->this.accept(a1);
+    }
+
+    static <A1> Consumer1<A1> dispatch(ToIntFunction<? super A1> dispatchFunction, Consumer1<? super A1>... consumers) {
         Objects.requireNonNull(dispatchFunction,"Consumer1 expects a not null dispatch function");
         Objects.requireNonNull(consumers,"Consumer1 expects a collection of single argument consumers");
         final Consumer<A1>[] finalConsumers = (Consumer<A1>[]) consumers.clone();
@@ -24,7 +31,7 @@ public interface Consumer1 {
         };
     }
 
-    static <A1> Consumer<A1> dispatch(Predicate<? super A1> dispatchPredicate, Consumer<? super A1> consumer1, Consumer<? super A1> consumer2) {
+    static <A1> Consumer1<A1> dispatch(Predicate<? super A1> dispatchPredicate, Consumer1<? super A1> consumer1, Consumer1<? super A1> consumer2) {
         Objects.requireNonNull(dispatchPredicate,"Consumer1 dispatch predicate is null");
         Objects.requireNonNull(consumer1,"Consumer1 first consumer is null");
         Objects.requireNonNull(consumer2,"Consumer1 second consumer is null");
@@ -35,6 +42,10 @@ public interface Consumer1 {
                 consumer2.accept(arg1);
             }
         };
+    }
+
+    static <A1> Consumer1<A1> of(Consumer<A1> f) {
+        return a1->f.accept(a1);
     }
 
 }

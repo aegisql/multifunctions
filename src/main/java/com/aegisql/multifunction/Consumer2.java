@@ -4,11 +4,15 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.ToIntBiFunction;
 
-public interface Consumer2 {
+public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
 
-    static <A1,A2> BiConsumer<A1,A2> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, BiConsumer<? super A1,? super A1>... consumers) {
+    @FunctionalInterface
+    interface Throwing<A1,A2>{ void accept(A1 a1, A2 a2) throws Exception; }
+
+    static <A1,A2> Consumer2<A1,A2> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, Consumer2<? super A1,? super A1>... consumers) {
         Objects.requireNonNull(dispatchFunction,"Consumer2 expects a not null dispatch bi-function");
         Objects.requireNonNull(consumers,"Consumer2 expects a collection of single argument bi-consumers");
         final BiConsumer<A1,A2>[] finalConsumers = (BiConsumer<A1,A2>[]) consumers.clone();
@@ -24,7 +28,7 @@ public interface Consumer2 {
         };
     }
 
-    static <A1,A2> BiConsumer<A1,A2> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, BiConsumer<? super A1,? super A2> consumer1, BiConsumer<? super A1,? super A2> consumer2) {
+    static <A1,A2> Consumer2<A1,A2> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, Consumer2<? super A1,? super A2> consumer1, Consumer2<? super A1,? super A2> consumer2) {
         Objects.requireNonNull(dispatchPredicate,"Consumer2 dispatch bi-predicate is null");
         Objects.requireNonNull(consumer1,"Consumer2 first bi-consumer is null");
         Objects.requireNonNull(consumer2,"Consumer2 second bi-consumer is null");
@@ -35,6 +39,10 @@ public interface Consumer2 {
                 consumer2.accept(arg1,arg2);
             }
         };
+    }
+
+    static <A1,A2> Consumer2<A1,A2> of(BiConsumer<A1,A2> f) {
+        return (a1,a2)->f.accept(a1,a2);
     }
 
 }

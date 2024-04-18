@@ -7,6 +7,9 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface Function3<A1,A2,A3,R> {
 
+    @FunctionalInterface
+    interface Throwing<A1,A2,A3,R>{ R apply(A1 a1, A2 a2, A3 a3) throws Exception; }
+
     R apply(A1 arg1, A2 arg2, A3 arg3);
 
     default <V> Function3<A1, A2, A3, V> andThen(Function<? super R, ? extends V> after) {
@@ -14,17 +17,19 @@ public interface Function3<A1,A2,A3,R> {
         return (a1,a2,a3) -> after.apply(apply(a1, a2, a3));
     }
 
-    default Function2<A2,A3,R> curry1(final A1 a1) {
+    default Function2<A2,A3,R> applyArg1(final A1 a1) {
         return (a2,a3)->this.apply(a1,a2,a3);
     }
 
-    default Function2<A1,A3,R> curry2(final A2 a2) {
+    default Function2<A1,A3,R> applyArg2(final A2 a2) {
         return (a1,a3)->this.apply(a1,a2,a3);
     }
 
-    default Function2<A1,A2,R> curry3(final A3 a3) {
+    default Function2<A1,A2,R> applyArg3(final A3 a3) {
         return (a1,a2)->this.apply(a1,a2,a3);
     }
+
+    static Function3<Object,Object,Object,String> toString = (a1,a2,a3)->"(%s, %s, %s)".formatted(a1,a2,a3);
 
     static <A1,A2,A3,R> Function3<A1,A2,A3,R> dispatch(ToInt3Function<? super A1,? super A2,? super A3> dispatchFunction, Function3<? super A1,? super A2,? super A3, R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function3 dispatch function is null");

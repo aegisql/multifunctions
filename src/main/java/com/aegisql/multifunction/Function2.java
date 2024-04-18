@@ -8,6 +8,11 @@ import java.util.function.ToIntBiFunction;
 
 public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
 
+    @FunctionalInterface
+    interface Throwing<A1,A2,R>{ R apply(A1 a1, A2 a2) throws Exception; }
+
+    static Function2<Object,Object,String> toString = (a1,a2)->"(%s, %s)".formatted(a1,a2);
+
     static <A1,A2,R> BiFunction<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, BiFunction<? super A1,? super A2,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function2 expects a not null dispatch function");
         Objects.requireNonNull(functions,"Function2 expects a collection of single argument functions");
@@ -37,11 +42,11 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
         };
     }
 
-    default Function1<A2,R> curry1(final A1 a1) {
+    default Function1<A2,R> applyArg1(final A1 a1) {
         return a2->this.apply(a1,a2);
     }
 
-    default Function1<A1,R> curry2(final A2 a2) {
+    default Function1<A1,R> applyArg2(final A2 a2) {
         return a1->this.apply(a1,a2);
     }
 
