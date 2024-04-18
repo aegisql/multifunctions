@@ -30,6 +30,10 @@ public interface Function1 <A1,R> extends Function<A1,R> {
         return ()->this.apply(a1);
     }
 
+    default SupplierExt<R> applyArg1(final Supplier<A1> a1Supplier) {
+        return ()->this.apply(a1Supplier.get());
+    }
+
     default Function1<A1, Optional<R>> optional() {
         return optional(()->null);
     }
@@ -52,7 +56,7 @@ public interface Function1 <A1,R> extends Function<A1,R> {
 
     static <A1,R> Function<A1,R> dispatch(ToIntFunction<? super A1> dispatchFunction, Function<? super A1,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function1 expects a not null dispatch function");
-        Objects.requireNonNull(functions,"Function1 expects a collection of single argument functions");
+        Objects.requireNonNull(functions,"Function1 expects a collection of single-argument functions");
         final Function<A1,R>[] finalFunctions = (Function<A1,R>[]) functions.clone();
         if(Arrays.stream(finalFunctions).anyMatch(Objects::isNull)) {
             throw new RuntimeException("Function1 expects not null functions");

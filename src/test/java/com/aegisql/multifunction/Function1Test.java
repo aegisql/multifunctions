@@ -170,6 +170,13 @@ class Function1Test {
     }
 
     @Test
+    public void partialApply2Test() {
+        Optional<String> optional = Function1.of(this::greetEng).applyArg1(SupplierExt.ofConst("Mike")).optional().get();
+        assertNotNull(optional);
+        assertEquals("Hello, Mike",optional.get());
+    }
+
+    @Test
     public void function1Size2Test() {
 
         HashMap map = new HashMap();
