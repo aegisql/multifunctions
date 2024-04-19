@@ -97,9 +97,9 @@ class Function1Test {
         assertTrue(divOptional.apply("0").isEmpty());
         assertTrue(divOptional.apply("NAN").isEmpty());
 
-        Function1<String, Optional<String>> optional2 = div.optional("ERROR");
+        Function1<String, Optional<String>> optional2 = div.optional();
         Optional<String> failed = optional2.apply("fail");
-        assertEquals("ERROR",failed.get());
+        assertTrue(failed.isEmpty());
 
     }
 

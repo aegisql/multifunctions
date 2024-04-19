@@ -4,35 +4,41 @@ import java.text.MessageFormat;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public interface SupplierExt <A> extends Supplier<A> {
+public interface SupplierExt<R> extends Supplier<R> {
 
     @FunctionalInterface
     interface Throwing<A>{ A get() throws Exception; }
 
-    default <X> SupplierExt<X> transform(Function1<? super A,? extends X> f) {
+    default <X> SupplierExt<X> transform(Function1<? super R,? extends X> f) {
         return ()->f.apply(get());
     }
 
-    default SupplierExt<Optional<A>> optional() {
-        return optional(()->null);
-    }
-
-    default SupplierExt<Optional<A>> optional(A defaultValue) {
-        return optional(()->defaultValue);
-    }
-
-    default SupplierExt<Optional<A>> optional(Supplier<A> defaultValue) {
+    default SupplierExt<Optional<R>> optional() {
         return ()->{
             try {
                 return Optional.ofNullable(get());
             } catch (Exception e) {
-                return Optional.ofNullable(defaultValue.get());
+                return Optional.empty();
+            }
+        };
+    }
+
+    default SupplierExt<R> orElse(R defaultValue) {
+        return orElse(()->defaultValue);
+    }
+
+    default SupplierExt<R> orElse(Supplier<R> defaultValue) {
+        return ()->{
+            try {
+                return get();
+            } catch (Exception e) {
+                return defaultValue.get();
             }
         };
     }
 
     static <A> SupplierExt<A> of(Supplier<A> supplier) {
-        return ()->supplier.get();
+        return supplier::get;
     }
 
     static <A> SupplierExt<A> ofConst(A value) {

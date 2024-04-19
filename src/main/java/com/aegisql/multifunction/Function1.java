@@ -35,29 +35,36 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     }
 
     default Function1<A1, Optional<R>> optional() {
-        return optional(()->null);
-    }
-
-    default Function1<A1, Optional<R>> optional(R defaultValue) {
-        return optional(()->defaultValue);
-    }
-
-    default Function1<A1, Optional<R>> optional(Supplier<R> defaultValue) {
         return a->{
             try {
                 return Optional.ofNullable(apply(a));
             } catch (Exception e) {
-                return Optional.ofNullable(defaultValue.get());
+                return Optional.empty();
             }
         };
     }
 
-    static Function1<Object,String> toString = (a1)->"(%s)".formatted(a1);
+    default Function1<A1,R> orElse(R defaultValue) {
+        return orElse(()->defaultValue);
+    }
 
+    default Function1<A1,R> orElse(Supplier<R> defaultValue) {
+        return a->{
+            try {
+                return apply(a);
+            } catch (Exception e) {
+                return defaultValue.get();
+            }
+        };
+    }
+
+    Function1<Object,String> toString = "(%s)"::formatted;
+
+    @SafeVarargs
     static <A1,R> Function<A1,R> dispatch(ToIntFunction<? super A1> dispatchFunction, Function<? super A1,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function1 expects a not null dispatch function");
         Objects.requireNonNull(functions,"Function1 expects a collection of single-argument functions");
-        final Function<A1,R>[] finalFunctions = (Function<A1,R>[]) functions.clone();
+        @SuppressWarnings("unchecked") final Function<A1,R>[] finalFunctions = (Function<A1,R>[]) functions.clone();
         if(Arrays.stream(finalFunctions).anyMatch(Objects::isNull)) {
             throw new RuntimeException("Function1 expects not null functions");
         }
@@ -84,7 +91,7 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     }
 
     static <A1,R> Function1<A1,R> of(Function<A1,R>  f) {
-        return a1->f.apply(a1);
+        return f::apply;
     }
 
     static <A1,R> Function1<A1,R> throwing(Throwing<A1,R>  f) {
