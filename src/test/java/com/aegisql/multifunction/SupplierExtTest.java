@@ -30,12 +30,18 @@ class SupplierExtTest {
         assertNotNull(getVal);
         assertEquals("VALUE",getVal.get());
 
+        SupplierExt<String> transform = value.transform(v -> v + "!");
+        assertEquals("VALUE!",transform.get());
+
     }
 
     @Test
     public void exceptionTest() {
         SupplierExt<String> throwing = SupplierExt.throwing(this::getEx);
         assertThrows(RuntimeException.class,()->throwing.get());
+
+        SupplierExt<String> error = throwing.orElse("ERROR");
+        assertEquals("ERROR",error.get());
     }
 
 }

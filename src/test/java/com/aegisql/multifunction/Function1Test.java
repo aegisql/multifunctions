@@ -101,6 +101,9 @@ class Function1Test {
         Optional<String> failed = optional2.apply("fail");
         assertTrue(failed.isEmpty());
 
+        String s1 = div.orElse("ERROR").apply("fail");
+        assertEquals("ERROR",s1);
+
     }
 
     @Test
