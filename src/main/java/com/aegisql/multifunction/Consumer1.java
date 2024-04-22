@@ -1,40 +1,38 @@
 package com.aegisql.multifunction;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+
+import static com.aegisql.multifunction.Utils.*;
 
 public interface Consumer1<A1> extends Consumer<A1> {
 
     @FunctionalInterface
     interface Throwing<A1>{ void accept(A1 a1) throws Exception; }
 
+    default Runnable lazyAccept(final A1 a1) {
+        return acceptArg1(a1);
+    }
+
     default Runnable acceptArg1(final A1 a1) {
         return ()->this.accept(a1);
     }
+    default Runnable acceptArg1(final Supplier<A1> a1Supplier) {
+        return ()->this.accept(a1Supplier.get());
+    }
 
+    @SafeVarargs
     static <A1> Consumer1<A1> dispatch(ToIntFunction<? super A1> dispatchFunction, Consumer1<? super A1>... consumers) {
         Objects.requireNonNull(dispatchFunction,"Consumer1 expects a not null dispatch function");
-        Objects.requireNonNull(consumers,"Consumer1 expects a collection of single argument consumers");
-        final Consumer<A1>[] finalConsumers = (Consumer<A1>[]) consumers.clone();
-        if(Arrays.stream(finalConsumers).anyMatch(Objects::isNull)) {
-            throw new RuntimeException("Consumer1 expects not null consumers");
-        }
-        return arg1 -> {
-            int pos = dispatchFunction.applyAsInt(arg1);
-            if(pos < 0 || pos >= finalConsumers.length) {
-                throw new RuntimeException("Consumer1 dispatch function returned wrong index="+pos+"; expected range 0.."+(finalConsumers.length-1)+"; arg1="+arg1);
-            }
-            finalConsumers[pos].accept(arg1);
-        };
+        var finalConsumers = validatedArrayCopy(consumers,"Consumer1");
+        return arg1 -> arrayValue(dispatchFunction.applyAsInt(arg1),finalConsumers).accept(arg1);
     }
 
     static <A1> Consumer1<A1> dispatch(Predicate<? super A1> dispatchPredicate, Consumer1<? super A1> consumer1, Consumer1<? super A1> consumer2) {
-        Objects.requireNonNull(dispatchPredicate,"Consumer1 dispatch predicate is null");
-        Objects.requireNonNull(consumer1,"Consumer1 first consumer is null");
-        Objects.requireNonNull(consumer2,"Consumer1 second consumer is null");
+        Utils.requiresNotNullArgs(dispatchPredicate,consumer1,consumer2,"Consumer1");
         return arg1 -> {
             if(dispatchPredicate.test(arg1)) {
                 consumer1.accept(arg1);
@@ -45,7 +43,26 @@ public interface Consumer1<A1> extends Consumer<A1> {
     }
 
     static <A1> Consumer1<A1> of(Consumer<A1> f) {
-        return a1->f.accept(a1);
+        return f::accept;
     }
+
+    static <A1> Consumer1<A1> throwing(Throwing<A1> f) {
+        return throwing(f,"{0}");
+    }
+
+    static <A1> Consumer1<A1> throwing(Throwing<A1> f, String format) {
+        return throwing(f,format,RuntimeException::new);
+    }
+
+    static <A1> Consumer1<A1> throwing(Throwing<A1> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
+        return a1->{
+            try {
+                f.accept(a1);
+            } catch (Exception e) {
+                throw exceptionFactory.apply(handleException(e,format,a1),e);
+            }
+        };
+    }
+
 
 }

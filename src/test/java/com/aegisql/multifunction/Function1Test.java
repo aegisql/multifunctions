@@ -3,27 +3,26 @@ package com.aegisql.multifunction;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class Function1Test {
 
-    public class MyRuntimeException extends RuntimeException {
+    public static class MyRuntimeException extends RuntimeException {
         public MyRuntimeException(String message, Throwable cause) {
             super(message, cause);
         }
     }
 
-    public class IsNull extends Exception{ }
-    public class IsZero extends Exception{
+    public static class IsNull extends Exception{ }
+    public static class IsZero extends Exception{
         public IsZero(String argIsZero) {
             super(argIsZero);
         }
     }
 
-    public class NotANumber extends Exception{
+    public static class NotANumber extends Exception{
         public NotANumber(String notANumber) {
             super(notANumber);
         }
@@ -132,10 +131,10 @@ class Function1Test {
         Function<String, String> dispatch = Function1.dispatch(
                 arg1 -> arg1.matches(russianCyrillicPattern),
                 this::greetRus,
-                this::greetEng).beforeApply(s->System.out.println("Before: "+s)).afterApply(s->System.out.println("complete")).andThen(s->s+"!");
+                this::greetEng).andThen(s->s+"!");
 
-        System.out.println(dispatch.apply("Mike"));
-        System.out.println(dispatch.apply("Миша"));
+        assertEquals("Hello, Mike!",dispatch.apply("Mike"));
+        assertEquals("Привет, Миша!",dispatch.apply("Миша"));
 
     }
     @Test
@@ -157,10 +156,10 @@ class Function1Test {
                 ,o->this.stringSize((String)o)
         );
 
-        System.out.println(dispatch.apply(map));
-        System.out.println(dispatch.apply(list));
-        System.out.println(dispatch.apply(list2));
-        System.out.println(dispatch.apply("test"));
+        assertEquals("Map size =0",dispatch.apply(map));
+        assertEquals("List size =0",dispatch.apply(list));
+        assertEquals("List size =0",dispatch.apply(list2));
+        assertEquals("String size =4",dispatch.apply("test"));
         assertThrows(RuntimeException.class,()->dispatch.apply(null));
 
     }
@@ -198,10 +197,10 @@ class Function1Test {
                 ,s->((String)s).length()
         );
 
-        System.out.println(dispatch.apply(map));
-        System.out.println(dispatch.apply(list));
-        System.out.println(dispatch.apply(list2));
-        System.out.println(dispatch.apply("test"));
+        assertEquals(0,dispatch.apply(map));
+        assertEquals(0,dispatch.apply(list));
+        assertEquals(3,dispatch.apply(list2));
+        assertEquals(4,dispatch.apply("test"));
         assertThrows(RuntimeException.class,()->dispatch.apply(null));
         assertThrows(RuntimeException.class,()->dispatch.apply(Integer.valueOf(1)));
 
