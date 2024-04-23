@@ -1,12 +1,12 @@
 package com.aegisql.multifunction;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
 import static com.aegisql.multifunction.Utils.*;
+import static java.util.Objects.requireNonNull;
 
 public interface Consumer1<A1> extends Consumer<A1> {
 
@@ -26,13 +26,13 @@ public interface Consumer1<A1> extends Consumer<A1> {
 
     @SafeVarargs
     static <A1> Consumer1<A1> dispatch(ToIntFunction<? super A1> dispatchFunction, Consumer1<? super A1>... consumers) {
-        Objects.requireNonNull(dispatchFunction,"Consumer1 expects a not null dispatch function");
+        requireNonNull(dispatchFunction,"Consumer1 expects a not null dispatch function");
         var finalConsumers = validatedArrayCopy(consumers,"Consumer1");
         return arg1 -> arrayValue(dispatchFunction.applyAsInt(arg1),finalConsumers).accept(arg1);
     }
 
     static <A1> Consumer1<A1> dispatch(Predicate<? super A1> dispatchPredicate, Consumer1<? super A1> consumer1, Consumer1<? super A1> consumer2) {
-        Utils.requiresNotNullArgs(dispatchPredicate,consumer1,consumer2,"Consumer1");
+        requiresNotNullArgs(dispatchPredicate,consumer1,consumer2,"Consumer1");
         return arg1 -> {
             if(dispatchPredicate.test(arg1)) {
                 consumer1.accept(arg1);
@@ -63,6 +63,4 @@ public interface Consumer1<A1> extends Consumer<A1> {
             }
         };
     }
-
-
 }

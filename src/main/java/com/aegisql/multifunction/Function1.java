@@ -1,10 +1,13 @@
 package com.aegisql.multifunction;
 
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
 import static com.aegisql.multifunction.Utils.*;
+import static java.util.Objects.requireNonNull;
 
 public interface Function1 <A1,R> extends Function<A1,R> {
 
@@ -49,13 +52,13 @@ public interface Function1 <A1,R> extends Function<A1,R> {
 
     @SafeVarargs
     static <A1,R> Function<A1,R> dispatch(ToIntFunction<? super A1> dispatchFunction, Function<? super A1,R>... functions) {
-        Objects.requireNonNull(dispatchFunction,"Function1 expects a dispatch function");
+        requireNonNull(dispatchFunction,"Function1 expects a dispatch function");
         var finalFunctions = validatedArrayCopy(functions,"Function1");
         return arg1 -> arrayValue(dispatchFunction.applyAsInt(arg1),finalFunctions).apply(arg1);
     }
 
     static <A1,R> Function1<A1,R> dispatch(Predicate<? super A1> dispatchPredicate, Function<? super A1,R> function1, Function<? super A1,R> function2) {
-        Utils.requiresNotNullArgs(dispatchPredicate,function1,function2,"Function1");
+        requiresNotNullArgs(dispatchPredicate,function1,function2,"Function1");
         return arg1 -> {
             if(dispatchPredicate.test(arg1)) {
                 return function1.apply(arg1);
@@ -86,5 +89,4 @@ public interface Function1 <A1,R> extends Function<A1,R> {
             }
         };
     }
-
 }
