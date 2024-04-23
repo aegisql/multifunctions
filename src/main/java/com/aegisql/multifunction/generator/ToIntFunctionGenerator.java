@@ -36,15 +36,10 @@ public interface \{className}<\{typeListBuilder.toString()}> {
     }
 
     public static void main(String[] args) {
-        if(args.length==0) {
-            System.out.println("""
-                Usage: ToIntFunctionGenerator n
-                where n is a number >=2
-                """);
-            System.exit(1);
-        }
         try {
-            generate(Integer.parseInt(args[0]));
+            for(int i = 3; i <=10; i++) {
+                generate(i);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(2);
