@@ -17,11 +17,9 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     default SupplierExt<R> lazyApply(final A1 a1) {
         return applyArg1(a1);
     }
-
     default SupplierExt<R> applyArg1(final A1 a1) {
         return ()->this.apply(a1);
     }
-
     default SupplierExt<R> applyArg1(final Supplier<A1> a1Supplier) {
         return ()->this.apply(a1Supplier.get());
     }
@@ -54,16 +52,16 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     static <A1,R> Function<A1,R> dispatch(ToIntFunction<? super A1> dispatchFunction, Function<? super A1,R>... functions) {
         requireNonNull(dispatchFunction,"Function1 expects a dispatch function");
         var finalFunctions = validatedArrayCopy(functions,"Function1");
-        return arg1 -> arrayValue(dispatchFunction.applyAsInt(arg1),finalFunctions).apply(arg1);
+        return a -> arrayValue(dispatchFunction.applyAsInt(a),finalFunctions).apply(a);
     }
 
     static <A1,R> Function1<A1,R> dispatch(Predicate<? super A1> dispatchPredicate, Function<? super A1,R> function1, Function<? super A1,R> function2) {
         requiresNotNullArgs(dispatchPredicate,function1,function2,"Function1");
-        return arg1 -> {
-            if(dispatchPredicate.test(arg1)) {
-                return function1.apply(arg1);
+        return a -> {
+            if(dispatchPredicate.test(a)) {
+                return function1.apply(a);
             } else {
-                return function2.apply(arg1);
+                return function2.apply(a);
             }
         };
     }
@@ -81,11 +79,11 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     }
 
     static <A1,R> Function1<A1,R> throwing(Throwing<A1,R>  f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
-        return a1->{
+        return a->{
             try {
-                return f.apply(a1);
+                return f.apply(a);
             } catch (Exception e) {
-                throw exceptionFactory.apply(handleException(e,format,a1),e);
+                throw exceptionFactory.apply(handleException(e,format,a),e);
             }
         };
     }

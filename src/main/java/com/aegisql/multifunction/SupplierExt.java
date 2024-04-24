@@ -1,8 +1,9 @@
 package com.aegisql.multifunction;
 
-import java.text.MessageFormat;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import static com.aegisql.multifunction.Utils.handleException;
 
 public interface SupplierExt<R> extends Supplier<R> {
 
@@ -58,12 +59,7 @@ public interface SupplierExt<R> extends Supplier<R> {
             try {
                 return f.get();
             } catch (Exception e) {
-                String message = e.getMessage();
-                if(message == null || message.isBlank()) {
-                    message = e.getClass().getSimpleName();
-                }
-                MessageFormat messageFormat = new MessageFormat(format);
-                throw exceptionFactory.apply(messageFormat.format(new Object[]{message}),e);
+                throw exceptionFactory.apply(handleException(e,format),e);
             }
         };
     }

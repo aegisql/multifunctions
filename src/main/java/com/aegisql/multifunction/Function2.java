@@ -1,57 +1,97 @@
 package com.aegisql.multifunction;
 
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import java.util.function.ToIntBiFunction;
+
+import static com.aegisql.multifunction.Utils.*;
 
 public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
 
     @FunctionalInterface
     interface Throwing<A1,A2,R>{ R apply(A1 a1, A2 a2) throws Exception; }
 
-    static Function2<Object,Object,String> toString = (a1,a2)->"(%s, %s)".formatted(a1,a2);
-
-    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, BiFunction<? super A1,? super A2,R>... functions) {
-        Objects.requireNonNull(dispatchFunction,"Function2 expects a not null dispatch function");
-        Objects.requireNonNull(functions,"Function2 expects a collection of single argument functions");
-        final BiFunction<A1,A2,R>[] finalFunctions = (BiFunction<A1,A2,R>[]) functions.clone();
-        if(Arrays.stream(finalFunctions).anyMatch(Objects::isNull)) {
-            throw new RuntimeException("Function2 expects not null functions");
-        }
-        return (arg1,arg2) -> {
-            int pos = dispatchFunction.applyAsInt(arg1,arg2);
-            if(pos < 0 || pos >= finalFunctions.length) {
-                throw new RuntimeException("Function2 dispatch function returned wrong index="+pos+"; expected range 0.."+(finalFunctions.length-1)+"; arg1="+arg1+"; arg2="+arg2);
-            }
-            return finalFunctions[pos].apply(arg1,arg2);
-        };
+    default SupplierExt<R> lazyApply(A1 a1, A2 a2) {
+        return applyArg1(a1).applyArg1(a2);
     }
-
-    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, BiFunction<? super A1,? super A2,R> function1, BiFunction<? super A1,? super A2,R> function2) {
-        Objects.requireNonNull(dispatchPredicate,"Function2 dispatch bi-predicate is null");
-        Objects.requireNonNull(function1,"Function2 first bi-function is null");
-        Objects.requireNonNull(function2,"Function2 second bi-function is null");
-        return (arg1,arg2) -> {
-            if(dispatchPredicate.test(arg1,arg2)) {
-                return function1.apply(arg1, arg2);
-            } else {
-                return function2.apply(arg1, arg2);
-            }
-        };
+    default Function1<A2,R> applyArg1(A1 a1) {
+        return (a)->apply(a1,a);
     }
-
-    default Function1<A2,R> applyArg1(final A1 a1) {
-        return a2->this.apply(a1,a2);
+    default Function1<A2,R> applyArg1(Supplier<A1> a1Supplier) {
+        return (a)->apply(a1Supplier.get(),a);
     }
-
     default Function1<A1,R> applyArg2(final A2 a2) {
         return a1->this.apply(a1,a2);
     }
+    default Function1<A1,R> applyArg2(Supplier<A2> a2Supplier) {
+        return (a)->apply(a,a2Supplier.get());
+    }
+
+    default Function2<A1,A2,Optional<R>> optional() {
+        return (a1,a2)->{
+            try {
+                return Optional.ofNullable(apply(a1,a2));
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        };
+    }
+
+    default Function2<A1,A2,R> orElse(R defaultValue) {
+        return orElse(()->defaultValue);
+    }
+
+    default Function2<A1,A2,R> orElse(Supplier<R> defaultValue) {
+        return (a1,a2)->{
+            try {
+                return apply(a1,a2);
+            } catch (Exception e) {
+                return defaultValue.get();
+            }
+        };
+    }
+
+    @SafeVarargs
+    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, BiFunction<? super A1,? super A2,R>... functions) {
+        Objects.requireNonNull(dispatchFunction,"Function2 expects a dispatch function");
+        var finalFunctions = validatedArrayCopy(functions,"Function2");
+        return (a1,a2) -> arrayValue(dispatchFunction.applyAsInt(a1,a2),finalFunctions).apply(a1,a2);
+    }
+
+    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, BiFunction<? super A1,? super A2,R> function1, BiFunction<? super A1,? super A2,R> function2) {
+        requiresNotNullArgs(dispatchPredicate,function1,function2,"Function2");
+        return (a1,a2) -> {
+            if(dispatchPredicate.test(a1,a2)) {
+                return function1.apply(a1, a2);
+            } else {
+                return function2.apply(a1, a2);
+            }
+        };
+    }
 
     static <A1,A2,R> Function2<A1,A2,R> of(BiFunction<A1,A2,R> f) {
-        return (a1,a2)->f.apply(a1,a2);
+        return f::apply;
+    }
+
+    static <A1,A2,R> Function2<A1,A2,R> throwing(Throwing<A1,A2,R> f) {
+        return throwing(f,"{0}; args:({1},{2})");
+    }
+
+    static <A1,A2,R> Function2<A1,A2,R> throwing(Throwing<A1,A2,R> f, String format) {
+        return throwing(f,format,RuntimeException::new);
+    }
+
+    static <A1,A2,R> Function2<A1,A2,R> throwing(Throwing<A1,A2,R> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
+        return (a1,a2)->{
+            try {
+                return f.apply(a1,a2);
+            } catch (Exception e) {
+                throw exceptionFactory.apply(handleException(e,format,a1,a2),e);
+            }
+        };
     }
 
 }
