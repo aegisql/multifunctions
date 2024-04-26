@@ -1,57 +1,90 @@
 package com.aegisql.multifunction;
 
+import com.aegisql.multifunction.harness.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Consumer;
-
-import static com.aegisql.multifunction.Function1Test.russianCyrillicPattern;
+import static org.junit.jupiter.api.Assertions.*;
 
 class Consumer1Test {
 
-    public void greetEng(String name) {
-        System.out.println("Hello, "+name);
-    }
-
-    public void greetRus(String name) {
-        System.out.println("Привет, "+name);
-    }
-
-    public void mul2(int x) {
-        System.out.println(x+"*2="+(x*2));
-    }
-
-    public void mul3(int x) {
-        System.out.println(x+"*3="+(x*3));
-    }
-
-    public void mul4(int x) {
-        System.out.println(x+"*4="+(x*4));
-    }
-
-
     @Test
-    public void consumer1Test() {
-        Consumer<String> dispatch = Consumer1.dispatch(name -> name.matches(russianCyrillicPattern),
-                this::greetRus,
-                this::greetEng);
+    public void dispatchPredicate2Test() {
+        var cm1 = new ConsumerMethods1();
+        var cm2 = new ConsumerMethods2();
+        var dispatch = Consumer1.dispatch((a1) -> a1 instanceof A1, cm1::c1, cm2::c1);
+        assertNotNull(dispatch);
 
-        dispatch.accept("Mike");
-        dispatch.accept("Миша");
+        dispatch.accept(new A1());
+        assertNotNull(cm1.getValConcat());
+        assertEquals("CM1:A1",cm1.getValConcat());
+        assertNull(cm2.getValConcat());
+
+        dispatch.accept(new B1());
+        assertNotNull(cm2.getValConcat());
+        assertEquals("CM2:B1",cm2.getValConcat());
 
     }
 
     @Test
-    public void consumer1MulTest() {
-        Consumer<Integer> dispatch = Consumer1.dispatch(x -> x % 3,
-                this::mul2,
-                this::mul3,
-                this::mul4
-        );
+    public void dispatch3Test() {
+        var cm1 = new ConsumerMethods1();
+        var cm2 = new ConsumerMethods2();
+        var cm3 = new ConsumerMethods3();
 
-        dispatch.accept(3);
-        dispatch.accept(4);
-        dispatch.accept(5);
+        var dispatch = Consumer1.dispatch((a1) -> switch (a1){
+            case A1 _ -> 0;
+            case B1 _-> 1;
+            case C1 _-> 2;
+            default -> 3;
+        }, cm1::c1, cm2::c1,cm3::c1);
+        assertNotNull(dispatch);
+
+        dispatch.accept(new A1());
+        assertNotNull(cm1.getValConcat());
+        assertEquals("CM1:A1",cm1.getValConcat());
+        assertNull(cm2.getValConcat());
+
+        dispatch.accept(new B1());
+        assertNotNull(cm2.getValConcat());
+        assertEquals("CM2:B1",cm2.getValConcat());
+
+        dispatch.accept(new C1());
+        assertNotNull(cm3.getValConcat());
+        assertEquals("CM3:C1",cm3.getValConcat());
+
+        assertThrows(IndexOutOfBoundsException.class,()->dispatch.accept(new D1()));
+    }
+
+    @Test
+    public void acceptTest() {
+        var cm1 = new ConsumerMethods1();
+        var c1 = Consumer1.of(cm1::c1);
+
+        var a1A1 = c1.acceptArg1(new A1());
+        var a1B1 = c1.acceptArg1(B1::new);
+        var a0C1 = c1.lazyAccept(new C1());
+
+        assertNull(cm1.getValConcat());
+
+        a1A1.run();
+        assertNotNull(cm1.getValConcat());
+        assertEquals("CM1:A1",cm1.getValConcat());
+
+        a1B1.run();
+        assertEquals("CM1:B1",cm1.getValConcat());
+
+        a0C1.run();
+        assertEquals("CM1:C1",cm1.getValConcat());
+
 
     }
 
+    @Test
+    public void throwingTest() {
+        var cm1 = new ConsumerMethods1();
+        var c1 = Consumer1.throwing(cm1::c1E);
+        c1.accept(new A1());
+        assertEquals("CM1:A1",cm1.getValConcat());
+        assertThrows(RuntimeException.class,()->c1.accept(null));
+    }
 }

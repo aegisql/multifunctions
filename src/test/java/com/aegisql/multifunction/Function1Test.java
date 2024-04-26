@@ -1,5 +1,6 @@
 package com.aegisql.multifunction;
 
+import com.aegisql.multifunction.harness.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -9,201 +10,77 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Function1Test {
 
-    public static class MyRuntimeException extends RuntimeException {
-        public MyRuntimeException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class IsNull extends Exception{ }
-    public static class IsZero extends Exception{
-        public IsZero(String argIsZero) {
-            super(argIsZero);
-        }
-    }
-
-    public static class NotANumber extends Exception{
-        public NotANumber(String notANumber) {
-            super(notANumber);
-        }
-    }
-
-    public String greetEng(String name) {
-        return "Hello, "+name;
-    }
-
-    public String greetRus(String name) {
-        return "Привет, "+name;
-    }
-
-    public String mapSize(Map map) {
-        return "Map size ="+map.size();
-    }
-
-    public String listSize(List list) {
-        return "List size ="+list.size();
-    }
-
-    public String stringSize(String str) {
-        return "String size ="+str.length();
-    }
-
-    public static final String russianCyrillicPattern = "[\\u0410-\\u044F\\u0401\\u0451]+";
-
-    public String div(String num) throws IsNull, IsZero, NotANumber {
-        if(num==null) throw new IsNull();
-        int x=0;
-        try {
-            x = Integer.parseInt(num);
-        } catch (Exception e) {
-            throw new NotANumber("not a number");
-        }
-        if(x==0) {
-            throw new IsZero("arg is zero");
-        }
-        return ""+(100/x);
-    }
-
     @Test
-    public void testThrowing() {
-        Function1<String, String> div = Function1.throwing(this::div);
-        Function1<String, Optional<String>> divOptional = div.optional();
-        String s = div.apply("10");
-        System.out.println(s);
-        try {
-            div.apply("0");
-            fail();
-        } catch (RuntimeException e){
-            assertEquals("arg is zero; arg:(0)",e.getMessage());
-        }
+    public void dispatchPredicate2Test() {
+        var fm1 = new FunctionMethods1();
+        var fm2 = new FunctionMethods2();
+        var dispatch = Function1.dispatch((a1) -> a1 instanceof A1, fm1::f1, fm2::f1);
+        assertNotNull(dispatch);
 
-        try {
-            div.apply(null);
-            fail();
-        } catch (RuntimeException e){
-            assertEquals("IsNull; arg:(null)",e.getMessage());
-        }
-
-
-        assertThrows(RuntimeException.class,()->div.apply(null));
-        assertThrows(RuntimeException.class,()->div.apply("0"));
-        assertThrows(RuntimeException.class,()->div.apply("test"));
-
-        Optional<String> optional = divOptional.apply("20");
-        assertFalse(optional.isEmpty());
-        assertEquals("5",optional.get());
-        assertTrue(divOptional.apply(null).isEmpty());
-        assertTrue(divOptional.apply("0").isEmpty());
-        assertTrue(divOptional.apply("NAN").isEmpty());
-
-        Function1<String, Optional<String>> optional2 = div.optional();
-        Optional<String> failed = optional2.apply("fail");
-        assertTrue(failed.isEmpty());
-
-        String s1 = div.orElse("ERROR").apply("fail");
-        assertEquals("ERROR",s1);
+        assertEquals("FM1:A1",dispatch.apply(new A1()));
+        assertEquals("FM2:B1",dispatch.apply(new B1()));
 
     }
 
     @Test
-    public void testThrowingWithMessage() {
+    public void dispatch3Test() {
+        var fm1 = new FunctionMethods1();
+        var fm2 = new FunctionMethods2();
+        var fm3 = new FunctionMethods3();
 
-        Function1<String, String> div = Function1.throwing(this::div,"division failed: arg=({1}) message: {0}",MyRuntimeException::new);
+        var dispatch = Function1.dispatch((a1) -> switch (a1){
+            case A1 _ -> 0;
+            case B1 _-> 1;
+            case C1 _-> 2;
+            default -> 3;
+        }, fm1::f1, fm2::f1,fm3::f1);
+        assertNotNull(dispatch);
 
-        String s = div.apply("10");
-        System.out.println(s);
-        try {
-            div.apply("0");
-            fail();
-        } catch (RuntimeException e){
-            assertEquals("division failed: arg=(0) message: arg is zero",e.getMessage());
-        }
+        assertEquals("FM1:A1",dispatch.apply(new A1()));
+        assertEquals("FM2:B1",dispatch.apply(new B1()));
+        assertEquals("FM3:C1",dispatch.apply(new C1()));
 
-        assertThrows(MyRuntimeException.class,()->div.apply(null));
-        assertThrows(MyRuntimeException.class,()->div.apply("0"));
-        assertThrows(MyRuntimeException.class,()->div.apply("test"));
-
+        assertThrows(IndexOutOfBoundsException.class,()->dispatch.apply(new D1()));
     }
 
     @Test
-    public void function1Test() {
+    public void acceptTest() {
+        var fm1 = new FunctionMethods1();
+        var f1 = Function1.of(fm1::f1);
 
-        Function<String, String> dispatch = Function1.dispatch(
-                arg1 -> arg1.matches(russianCyrillicPattern),
-                this::greetRus,
-                this::greetEng).andThen(s->s+"!");
+        var a1A1 = f1.applyArg1(new A1());
+        var a1B1 = f1.applyArg1(B1::new);
+        var a0C1 = f1.lazyApply(new C1());
 
-        assertEquals("Hello, Mike!",dispatch.apply("Mike"));
-        assertEquals("Привет, Миша!",dispatch.apply("Миша"));
-
-    }
-    @Test
-    public void function1Size1Test() {
-
-        HashMap map = new HashMap();
-        ArrayList list = new ArrayList();
-        LinkedList list2 = new LinkedList();
-
-        Function<? super Object, String> dispatch = Function1.dispatch(arg1 -> switch (arg1) {
-                    case null -> Integer.MAX_VALUE;
-                    case List o -> 0;
-                    case Map o -> 1;
-                    case String o -> 2;
-                    default -> -1;
-        }
-                ,o->this.listSize((List)o)
-                ,o->this.mapSize((Map)o)
-                ,o->this.stringSize((String)o)
-        );
-
-        assertEquals("Map size =0",dispatch.apply(map));
-        assertEquals("List size =0",dispatch.apply(list));
-        assertEquals("List size =0",dispatch.apply(list2));
-        assertEquals("String size =4",dispatch.apply("test"));
-        assertThrows(RuntimeException.class,()->dispatch.apply(null));
-
+        assertEquals("FM1:A1",a1A1.get());
+        assertEquals("FM1:B1",a1B1.get());
+        assertEquals("FM1:C1",a0C1.get());
     }
 
     @Test
-    public void partialApplyTest() {
-        Optional<String> optional = Function1.of(this::greetEng).applyArg1("Mike").optional().get();
-        assertNotNull(optional);
-        assertEquals("Hello, Mike",optional.get());
+    public void throwingTest() {
+        var fm1 = new FunctionMethods1();
+        var f1 = Function1.throwing(fm1::f1E);
+        assertEquals("FM1:A1",f1.apply(new A1()));
+        assertThrows(RuntimeException.class,()->f1.apply(null));
     }
 
     @Test
-    public void partialApply2Test() {
-        Optional<String> optional = Function1.of(this::greetEng).applyArg1(SupplierExt.ofConst("Mike")).optional().get();
-        assertNotNull(optional);
-        assertEquals("Hello, Mike",optional.get());
+    public void optionalTest() {
+        var fm1 = new FunctionMethods1();
+        var f1 = Function1.throwing(fm1::f1E).optional();
+        assertEquals("FM1:A1",f1.apply(new A1()).get());
+        var optional = f1.apply(null);
+        assertTrue(optional.isEmpty());
     }
 
     @Test
-    public void function1Size2Test() {
-
-        HashMap map = new HashMap();
-        ArrayList list = new ArrayList();
-        List list2 = List.of(1,2,3);
-
-        Function<Object, Integer> dispatch = Function1.dispatch(arg1 -> switch (arg1) {
-                    case null -> Integer.MAX_VALUE;
-                    case List l -> 0;
-                    case Map m -> 1;
-                    case String s -> 2;
-                    default -> -1;
-                }
-                ,l->((List)l).size()
-                ,m->((Map)m).size()
-                ,s->((String)s).length()
-        );
-
-        assertEquals(0,dispatch.apply(map));
-        assertEquals(0,dispatch.apply(list));
-        assertEquals(3,dispatch.apply(list2));
-        assertEquals(4,dispatch.apply("test"));
-        assertThrows(RuntimeException.class,()->dispatch.apply(null));
-        assertThrows(RuntimeException.class,()->dispatch.apply(Integer.valueOf(1)));
-
+    public void defaultValTest() {
+        var fm1 = new FunctionMethods1();
+        var f1 = Function1.throwing(fm1::f1E).orElse("SOMETHING WRONG");
+        assertEquals("FM1:A1",f1.apply(new A1()));
+        var defaultVal = f1.apply(null);
+        assertEquals("SOMETHING WRONG",defaultVal);
     }
 
 }
