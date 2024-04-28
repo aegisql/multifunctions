@@ -124,9 +124,24 @@ class Function2Test {
 
     @Test
     void dispatch() {
+        var dispatch = Function2.dispatch((a,b) -> (a instanceof Number) && (b instanceof Number)
+                , (a,b) -> {
+            return "Number: "+(((Number)a).doubleValue()+((Number)b).doubleValue());
+        },(a,b) -> {
+            return "Other: " + a + b;
+        });
+
+        assertEquals("Other: ab",dispatch.apply("a","b"));
+        assertEquals("Number: 3.0",dispatch.apply(1,2));
+        assertEquals("Number: 4.6",dispatch.apply(1.0,3.6));
+
     }
 
     @Test
     void testDispatch() {
     }
+
+
+
+
 }
