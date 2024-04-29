@@ -13,14 +13,18 @@ public interface Consumer1<A1> extends Consumer<A1> {
     @FunctionalInterface
     interface Throwing<A1>{ void accept(A1 a1) throws Exception; }
 
-    default Runnable lazyAccept(A1 a1) {
+    default RunnableExt lazyAccept(A1 a1) {
         return acceptArg1(a1);
     }
-    default Runnable acceptArg1(A1 a1) {
+    default RunnableExt acceptArg1(A1 a1) {
         return ()->this.accept(a1);
     }
-    default Runnable acceptArg1(Supplier<A1> a1Supplier) {
+    default RunnableExt acceptArg1(Supplier<A1> a1Supplier) {
         return ()->this.accept(a1Supplier.get());
+    }
+
+    default <X> Consumer2<X,A1> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
     @SafeVarargs

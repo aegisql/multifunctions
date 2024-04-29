@@ -9,6 +9,7 @@ import java.util.function.ToIntFunction;
 import static com.aegisql.multifunction.Utils.*;
 import static java.util.Objects.requireNonNull;
 
+@FunctionalInterface
 public interface Function1 <A1,R> extends Function<A1,R> {
 
     @FunctionalInterface
@@ -18,10 +19,35 @@ public interface Function1 <A1,R> extends Function<A1,R> {
         return applyArg1(a1);
     }
     default SupplierExt<R> applyArg1(final A1 a1) {
-        return ()->this.apply(a1);
+        var f = this;
+        return new SupplierExt<>() {
+            @Override
+            public R get() {
+                return apply(a1);
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Function1<A1,R> uncurry() {
+                return f;
+            }
+        };
     }
     default SupplierExt<R> applyArg1(final Supplier<A1> a1Supplier) {
-        return ()->this.apply(a1Supplier.get());
+        var f = this;
+        return new SupplierExt<>() {
+            @Override
+            public R get() {
+                return apply(a1Supplier.get());
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Function1<A1,R> uncurry() {
+                return f;
+            }
+        };
+    }
+    default <X> Function2<X,A1,R> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
     default Function1<A1, Optional<R>> optional() {

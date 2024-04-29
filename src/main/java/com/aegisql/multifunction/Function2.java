@@ -9,6 +9,7 @@ import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
+@FunctionalInterface
 public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
 
     @FunctionalInterface
@@ -18,16 +19,19 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
         return applyArg1(a1).applyArg1(a2);
     }
     default Function1<A2,R> applyArg1(A1 a1) {
-        return (a)->apply(a1,a);
+        return (a2)->apply(a1,a2);
     }
     default Function1<A2,R> applyArg1(Supplier<A1> a1Supplier) {
-        return (a)->apply(a1Supplier.get(),a);
+        return (a2)->apply(a1Supplier.get(),a2);
     }
     default Function1<A1,R> applyArg2(final A2 a2) {
         return a1->this.apply(a1,a2);
     }
     default Function1<A1,R> applyArg2(Supplier<A2> a2Supplier) {
-        return (a)->apply(a,a2Supplier.get());
+        return (a1)->apply(a1,a2Supplier.get());
+    }
+    default <X> Function3<X,A1,A2,R> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
     default Function2<A1,A2,Optional<R>> optional() {
@@ -55,13 +59,13 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
     }
 
     @SafeVarargs
-    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, BiFunction<? super A1,? super A2,R>... functions) {
+    static <A1,A2,R> Function2<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, Function2<? super A1,? super A2,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function2 expects a dispatch function");
         var finalFunctions = validatedArrayCopy(functions,"Function2");
         return (a1,a2) -> arrayValue(dispatchFunction.applyAsInt(a1,a2),finalFunctions).apply(a1,a2);
     }
 
-    static <A1,A2,R> BiFunction<A1,A2,R> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, BiFunction<? super A1,? super A2,R> function1, BiFunction<? super A1,? super A2,R> function2) {
+    static <A1,A2,R> Function2<A1,A2,R> dispatch(BiPredicate<? super A1,? super A2> dispatchPredicate, Function2<? super A1,? super A2,R> function1, Function2<? super A1,? super A2,R> function2) {
         requiresNotNullArgs(dispatchPredicate,function1,function2,"Function2");
         return (a1,a2) -> {
             if(dispatchPredicate.test(a1,a2)) {

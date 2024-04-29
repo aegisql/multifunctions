@@ -1,47 +1,227 @@
 package com.aegisql.multifunction;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Function;
-@FunctionalInterface
-public interface Function5<A1,A2,A3,A4,A5,R> {
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static com.aegisql.multifunction.Utils.*;
+
+public interface Function5 <A1,A2,A3,A4,A5,R> {
 
     @FunctionalInterface
-    interface Throwing<A1,A2,A3,A4,A5,R>{ R apply(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) throws Exception; }
+    interface Throwing<A1,A2,A3,A4,A5,R>{ R apply(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) throws Exception; }
 
-    R apply(A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5);
+    R apply(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5);
 
-    default <V> Function5<A1, A2, A3, A4, A5, V> andThen(Function<? super R, ? extends V> after) {
-        Objects.requireNonNull(after);
-        return (a1,a2,a3,a4,a5) -> after.apply(apply(a1, a2, a3, a4, a5));
+    default SupplierExt<R> lazyApply(A1 a1,A2 a2,A3 a3,A4 a4,A5 a5) {
+        return applyArg1(a1).applyArg1(a2).applyArg1(a3).applyArg1(a4).applyArg1(a5);
     }
-
-    static Function5<Object,Object,Object,Object,Object,String> toString = (a1,a2,a3,a4,a5)->"(%s, %s, %s, %s, %s)".formatted(a1,a2,a3,a4,a5);
-    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> dispatch(ToInt5Function<? super A1,? super A2,? super A3, ? super A4, ? super A5> dispatchFunction, Function5<? super A1,? super A2,? super A3, ? super A4, ? super A5, R>... functions) {
-        Objects.requireNonNull(dispatchFunction,"Function5 dispatch function is null");
-        Objects.requireNonNull(functions,"Function5 expects a collection of five argument functions");
-        final Function5<A1,A2,A3,A4,A5,R>[] finalFunctions = (Function5<A1,A2,A3,A4,A5,R>[]) functions.clone();
-        if(Arrays.stream(finalFunctions).anyMatch(Objects::isNull)) {
-            throw new RuntimeException("Function5 expects not null functions");
+    default Function4<A2,A3,A4,A5,R> applyArg1(A1 a1) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A2 a2,A3 a3,A4 a4,A5 a5) {
+            return f.apply(a1,a2,a3,a4,a5);
         }
-        return (arg1,arg2,arg3,arg4,arg5) -> {
-            int pos = dispatchFunction.applyAsInt(arg1,arg2,arg3,arg4,arg5);
-            if(pos < 0 || pos >= finalFunctions.length) {
-                throw new RuntimeException("Function5 dispatch function returned wrong index="+pos+"; expected range 0.."+(finalFunctions.length-1)+"; arg1="+arg1+"; arg2="+arg2+"; arg3="+arg3+"; arg4="+arg4+"; arg5="+arg5);
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A2,A3,A4,A5,R> applyArg1(Supplier<A1> a1Supplier) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A2 a2,A3 a3,A4 a4,A5 a5) {
+            return f.apply(a1Supplier.get(),a2,a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A3,A4,A5,R> applyArg2(A2 a2) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A3 a3,A4 a4,A5 a5) {
+            return f.apply(a1,a2,a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A3,A4,A5,R> applyArg2(Supplier<A2> a2Supplier) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A3 a3,A4 a4,A5 a5) {
+            return f.apply(a1,a2Supplier.get(),a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A4,A5,R> applyArg3(A3 a3) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A4 a4,A5 a5) {
+            return f.apply(a1,a2,a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A4,A5,R> applyArg3(Supplier<A3> a3Supplier) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A4 a4,A5 a5) {
+            return f.apply(a1,a2,a3Supplier.get(),a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A3,A5,R> applyArg4(A4 a4) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A3 a3,A5 a5) {
+            return f.apply(a1,a2,a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A3,A5,R> applyArg4(Supplier<A4> a4Supplier) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A3 a3,A5 a5) {
+            return f.apply(a1,a2,a3,a4Supplier.get(),a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A3,A4,R> applyArg5(A5 a5) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A3 a3,A4 a4) {
+            return f.apply(a1,a2,a3,a4,a5);
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+default Function4<A1,A2,A3,A4,R> applyArg5(Supplier<A5> a5Supplier) {
+    var f = this;
+    return new Function4<>() {
+        @Override
+        public R apply(A1 a1,A2 a2,A3 a3,A4 a4) {
+            return f.apply(a1,a2,a3,a4,a5Supplier.get());
+        }
+        @SuppressWarnings("unchecked")
+        @Override
+        public Function5<A1,A2,A3,A4,A5,R> uncurry() {
+            return f;
+        }
+    };
+}
+
+    
+    default <X> Function6<X,A1,A2,A3,A4,A5,R> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
+    }
+    
+    default Function5<A1,A2,A3,A4,A5,Optional<R>> optional() {
+        return (a1,a2,a3,a4,a5)->{
+            try {
+                return Optional.ofNullable(apply(a1,a2,a3,a4,a5));
+            } catch (Exception e) {
+                return Optional.empty();
             }
-            return finalFunctions[pos].apply(arg1,arg2,arg3,arg4,arg5);
         };
     }
 
-    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> dispatch(Predicate5<? super A1,? super A2,? super A3,? super A4, ? super A5> dispatchPredicate, Function5<? super A1,? super A2,? super A3,? super A4, ? super A5, R> function1, Function5<? super A1,? super A2,? super A3,? super A4, ? super A5, R> function2) {
-        Objects.requireNonNull(dispatchPredicate,"Function5 dispatch predicate5 is null");
-        Objects.requireNonNull(function1,"Function5 first function5 is null");
-        Objects.requireNonNull(function2,"Function5 second function5 is null");
-        return (arg1,arg2,arg3,arg4,arg5) -> {
-            if(dispatchPredicate.test(arg1,arg2,arg3,arg4,arg5)) {
-                return function1.apply(arg1, arg2,arg3,arg4,arg5);
+    default Function5<A1,A2,A3,A4,A5,R> orElse(R defaultValue) {
+        return orElse(()->defaultValue);
+    }
+
+    default Function5<A1,A2,A3,A4,A5,R> orElse(Supplier<R> defaultValue) {
+        return (a1,a2,a3,a4,a5)->{
+            try {
+                return apply(a1,a2,a3,a4,a5);
+            } catch (Exception e) {
+                return defaultValue.get();
+            }
+        };
+    }
+
+    @SafeVarargs
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> dispatch(ToInt5Function<? super A1,? super A2,? super A3,? super A4,? super A5> dispatchFunction, Function5<? super A1,? super A2,? super A3,? super A4,? super A5,R>... functions) {
+        Objects.requireNonNull(dispatchFunction,"Function5 expects a dispatch function");
+        var finalFunctions = validatedArrayCopy(functions,"Function5");
+        return (a1,a2,a3,a4,a5) -> arrayValue(dispatchFunction.applyAsInt(a1,a2,a3,a4,a5),finalFunctions).apply(a1,a2,a3,a4,a5);
+    }
+
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> dispatch(Predicate5<? super A1,? super A2,? super A3,? super A4,? super A5> dispatchPredicate, Function5<? super A1,? super A2,? super A3,? super A4,? super A5,R> function1, Function5<? super A1,? super A2,? super A3,? super A4,? super A5,R> function2) {
+        requiresNotNullArgs(dispatchPredicate,function1,function2,"Function5");
+        return (a1,a2,a3,a4,a5) -> {
+            if(dispatchPredicate.test(a1,a2,a3,a4,a5)) {
+                return function1.apply(a1,a2,a3,a4,a5);
             } else {
-                return function2.apply(arg1, arg2, arg3,arg4,arg5);
+                return function2.apply(a1,a2,a3,a4,a5);
+            }
+        };
+    }
+
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> of(Function5<A1,A2,A3,A4,A5,R> f) {
+        return f::apply;
+    }
+
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> throwing(Throwing<A1,A2,A3,A4,A5,R> f) {
+        return throwing(f,"{0}; args:({1},{2},{3},{4},{5})");
+    }
+
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> throwing(Throwing<A1,A2,A3,A4,A5,R> f, String format) {
+        return throwing(f,format,RuntimeException::new);
+    }
+
+    static <A1,A2,A3,A4,A5,R> Function5<A1,A2,A3,A4,A5,R> throwing(Throwing<A1,A2,A3,A4,A5,R> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
+        return (a1,a2,a3,a4,a5)->{
+            try {
+                return f.apply(a1,a2,a3,a4,a5);
+            } catch (Exception e) {
+                throw exceptionFactory.apply(handleException(e,format,a1,a2,a3,a4,a5),e);
             }
         };
     }

@@ -7,6 +7,10 @@ public interface RunnableExt extends Runnable {
     @FunctionalInterface
     interface Throwing { void run() throws Exception; }
 
+    default <X> Consumer1<X> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
+    }
+
     static RunnableExt of(Runnable runnable) {
         return runnable::run;
     }

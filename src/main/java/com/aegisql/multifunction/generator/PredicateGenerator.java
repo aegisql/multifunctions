@@ -1,35 +1,12 @@
 package com.aegisql.multifunction.generator;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import static com.aegisql.multifunction.generator.ArgUtils.*;
 
 public class PredicateGenerator {
 
-    private static void generate(int functionNumber) throws IOException {
+    private static void generate(int functionNumber) {
 
         String className = "Predicate"+functionNumber;
-
-        StringBuilder typeListBuilder = new StringBuilder("A1");
-        for (int i = 2; i <= functionNumber; i++) {
-            typeListBuilder.append(",").append("A").append(i);
-        }
-
-        StringBuilder argListBuilder = new StringBuilder("A1 a1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argListBuilder.append(", ").append("A").append(i).append(" a").append(i);
-        }
-
-        StringBuilder argShortListBuilder = new StringBuilder("a1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argShortListBuilder.append(",").append("a").append(i);
-        }
-
-        StringBuilder argSuperListBuilder = new StringBuilder("? super A1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argSuperListBuilder.append(", ").append("? super A").append(i);
-        }
 
         String code = STR."""
 package com.aegisql.multifunction.tmp;
@@ -37,41 +14,32 @@ package com.aegisql.multifunction.tmp;
 import java.util.Objects;
 
 @FunctionalInterface
-public interface \{className}<\{typeListBuilder.toString()}> {
-    boolean test(\{argListBuilder.toString()});
+public interface \{className}<\{types(functionNumber)}> {
+    boolean test(\{typedArgs(functionNumber)});
 
-    default \{className}<\{typeListBuilder.toString()}> and(\{className}<\{argSuperListBuilder.toString()}> other) {
+    default \{className}<\{types(functionNumber)}> and(\{className}<\{superTypes(functionNumber)}> other) {
         Objects.requireNonNull(other);
-        return (\{argShortListBuilder.toString()}) -> test(\{argShortListBuilder.toString()}) && other.test(\{argShortListBuilder.toString()});
+        return (\{args(functionNumber)}) -> test(\{args(functionNumber)}) && other.test(\{args(functionNumber)});
     }
 
-    default \{className}<\{typeListBuilder.toString()}> negate() {
-        return (\{argShortListBuilder.toString()}) -> !test(\{argShortListBuilder.toString()});
+    default \{className}<\{types(functionNumber)}> negate() {
+        return (\{args(functionNumber)}) -> !test(\{args(functionNumber)});
     }
 
-    default \{className}<\{typeListBuilder.toString()}> or(\{className}<\{argSuperListBuilder.toString()}> other) {
+    default \{className}<\{types(functionNumber)}> or(\{className}<\{superTypes(functionNumber)}> other) {
         Objects.requireNonNull(other);
-        return (\{argShortListBuilder.toString()}) -> test(\{argShortListBuilder.toString()}) || other.test(\{argShortListBuilder.toString()});
+        return (\{args(functionNumber)}) -> test(\{args(functionNumber)}) || other.test(\{args(functionNumber)});
     }
 }
                 """;
-        System.out.println(code);
 
-        Path path = Path.of("src/main/java/com/aegisql/multifunction/tmp/"+className+".java");
-        Files.writeString(path,code, StandardCharsets.UTF_8);
-
+        saveClass(className,code);
     }
 
     public static void main(String[] args) {
-        try {
             for(int i = 3; i <=10; i++) {
                 generate(i);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(2);
-        }
-
     }
 
 }

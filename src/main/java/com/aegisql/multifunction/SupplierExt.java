@@ -1,6 +1,7 @@
 package com.aegisql.multifunction;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.handleException;
@@ -12,6 +13,10 @@ public interface SupplierExt<R> extends Supplier<R> {
 
     default <X> SupplierExt<X> transform(Function1<? super R,? extends X> f) {
         return ()->f.apply(get());
+    }
+
+    default <X> Function1<X,R> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
     default SupplierExt<Optional<R>> optional() {

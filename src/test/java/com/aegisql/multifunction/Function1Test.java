@@ -55,6 +55,14 @@ class Function1Test {
         assertEquals("FM1:A1",a1A1.get());
         assertEquals("FM1:B1",a1B1.get());
         assertEquals("FM1:C1",a0C1.get());
+
+        Function1<Object, String> restoredFunction = a1A1.uncurry(); //this works
+        assertEquals("FM1:A1", restoredFunction.apply(new A1()));
+        assertThrows(ClassCastException.class,()->restoredFunction.apply(""));
+
+        SupplierExt<String> wrap = SupplierExt.of(a1A1);
+        assertThrows(UnsupportedOperationException.class,wrap::uncurry); //this should not!
+
     }
 
     @Test

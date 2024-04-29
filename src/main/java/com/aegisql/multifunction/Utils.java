@@ -3,7 +3,7 @@ package com.aegisql.multifunction;
 import java.text.MessageFormat;
 import java.util.Objects;
 
-class Utils {
+public class Utils {
 
     public static String handleException(Exception e, String format, Object... values) {
         String message = e.getMessage();
