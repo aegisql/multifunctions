@@ -63,6 +63,21 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
         };
     }
 
+    default Function2<A1,A2,R> before(Consumer2<A1,A2> before) {
+        return (a1,a2)-> {
+            before.accept(a1,a2);
+            return apply(a1,a2);
+        };
+    }
+
+    default Function2<A1,A2,R> after(Consumer3<A1,A2,R> after) {
+        return (a1,a2)-> {
+            var result = apply(a1,a2);
+            after.accept(a1,a2,result);
+            return result;
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,R> Function2<A1,A2,R> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, Function2<? super A1,? super A2,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function2 expects a dispatch function");

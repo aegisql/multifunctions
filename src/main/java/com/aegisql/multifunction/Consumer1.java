@@ -32,6 +32,20 @@ public interface Consumer1<A1> extends Consumer<A1> {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
+    default Consumer1<A1> before(Consumer1<? super A1> before) {
+        return (a1)-> {
+            before.accept(a1);
+            this.accept(a1);
+        };
+    }
+
+    default Consumer1<A1>  after(Consumer1<? super A1>  after) {
+        return (a1)-> {
+            this.accept(a1);
+            after.accept(a1);
+        };
+    }
+
     @SafeVarargs
     static <A1> Consumer1<A1> dispatch(ToIntFunction<? super A1> dispatchFunction, Consumer1<? super A1>... consumers) {
         requireNonNull(dispatchFunction,"Consumer1 expects a dispatch function");

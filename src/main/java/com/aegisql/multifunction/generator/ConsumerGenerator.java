@@ -53,6 +53,20 @@ public interface Consumer\{fN} <\{types(fN)}> {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     \{isLast ? "*/":""}
+    default \{className}<\{types(fN)}> before(\{className}<\{superTypes(fN)}> before) {
+        return (\{args(fN)})-> {
+            before.accept(\{args(fN)});
+            this.accept(\{args(fN)});
+        };
+    }
+
+    default \{className}<\{types(fN)}>  after(\{className}<\{superTypes(fN)}> after) {
+        return (\{args(fN)})-> {
+            this.accept(\{args(fN)});
+            after.accept(\{args(fN)});
+        };
+    }
+
     @SafeVarargs
     static <\{types(fN)}> \{className}<\{types(fN)}> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)}>... functions) {
         Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");

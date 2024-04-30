@@ -37,6 +37,20 @@ public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
+    default Consumer2<A1,A2> before(Consumer2<? super A1,? super A2> before) {
+        return (a1,a2)-> {
+            before.accept(a1,a2);
+            this.accept(a1,a2);
+        };
+    }
+
+    default Consumer2<A1,A2>  after(Consumer2<? super A1,? super A2>  after) {
+        return (a1,a2)-> {
+            this.accept(a1,a2);
+            after.accept(a1,a2);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2> Consumer2<A1,A2> dispatch(ToIntBiFunction<? super A1,? super A2> dispatchFunction, Consumer2<? super A1,? super A2>... consumers) {
         requireNonNull(dispatchFunction,"Consumer2 expects a dispatch function");

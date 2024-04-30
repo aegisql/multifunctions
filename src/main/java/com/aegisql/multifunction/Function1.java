@@ -79,6 +79,21 @@ public interface Function1 <A1,R> extends Function<A1,R> {
         };
     }
 
+    default Function1<A1,R> before(Consumer1<A1> before) {
+        return (a1)-> {
+            before.accept(a1);
+            return apply(a1);
+        };
+    }
+
+    default Function1<A1,R> after(Consumer2<A1,R> after) {
+        return (a1)-> {
+            var result = apply(a1);
+            after.accept(a1,result);
+            return result;
+        };
+    }
+
     @SafeVarargs
     static <A1,R> Function<A1,R> dispatch(ToIntFunction<? super A1> dispatchFunction, Function<? super A1,R>... functions) {
         requireNonNull(dispatchFunction,"Function1 expects a dispatch function");

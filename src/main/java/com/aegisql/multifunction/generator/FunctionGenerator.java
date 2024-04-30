@@ -49,11 +49,11 @@ public interface Function\{fN} <\{types(fN)},R> {
     }
     \{applyArgs}
     \{isLast ? "/*":""}
-    default <X> Function\{nextFN}<X,\{types(fN)},R> uncurry() {
+    default <X> \{nextClassName}<X,\{types(fN)},R> uncurry() {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     \{isLast ? "*/":""}
-    default Function\{fN}<\{types(fN)},Optional<R>> optional() {
+    default \{className}<\{types(fN)},Optional<R>> optional() {
         return (\{args(fN)})->{
             try {
                 return Optional.ofNullable(apply(\{args(fN)}));
@@ -63,11 +63,11 @@ public interface Function\{fN} <\{types(fN)},R> {
         };
     }
 
-    default Function\{fN}<\{types(fN)},R> orElse(R defaultValue) {
+    default \{className}<\{types(fN)},R> orElse(R defaultValue) {
         return orElse(()->defaultValue);
     }
 
-    default Function\{fN}<\{types(fN)},R> orElse(Supplier<R> defaultValue) {
+    default \{className}<\{types(fN)},R> orElse(Supplier<R> defaultValue) {
         return (\{args(fN)})->{
             try {
                 return apply(\{args(fN)});
@@ -77,14 +77,29 @@ public interface Function\{fN} <\{types(fN)},R> {
         };
     }
 
+    default \{className}<\{types(fN)},R> before(Consumer\{fN}<\{types(fN)}> before) {
+        return (\{args(fN)})-> {
+            before.accept(\{args(fN)});
+            return apply(\{args(fN)});
+        };
+    }
+    \{isLast ? "/*":""}
+    default \{className}<\{types(fN)},R> after(Consumer\{nextFN}<\{types(fN)},R> after) {
+        return (\{args(fN)})-> {
+            var result = apply(\{args(fN)});
+            after.accept(\{args(fN)},result);
+            return result;
+        };
+    }
+    \{isLast ? "*/":""}
     @SafeVarargs
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, Function\{fN}<\{superTypes(fN)},R>... functions) {
-        Objects.requireNonNull(dispatchFunction,"Function\{fN} expects a dispatch function");
-        var finalFunctions = validatedArrayCopy(functions,"Function\{fN}");
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)},R>... functions) {
+        Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");
+        var finalFunctions = validatedArrayCopy(functions,"\{className}");
         return (\{args(fN)}) -> arrayValue(dispatchFunction.applyAsInt(\{args(fN)}),finalFunctions).apply(\{args(fN)});
     }
 
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> dispatch(Predicate\{fN}<\{superTypes(fN)}> dispatchPredicate, Function\{fN}<\{superTypes(fN)},R> function1, Function\{fN}<\{superTypes(fN)},R> function2) {
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> dispatch(Predicate\{fN}<\{superTypes(fN)}> dispatchPredicate, \{className}<\{superTypes(fN)},R> function1, \{className}<\{superTypes(fN)},R> function2) {
         requiresNotNullArgs(dispatchPredicate,function1,function2,"Function\{fN}");
         return (\{args(fN)}) -> {
             if(dispatchPredicate.test(\{args(fN)})) {
@@ -95,19 +110,19 @@ public interface Function\{fN} <\{types(fN)},R> {
         };
     }
 
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> of(Function\{fN}<\{types(fN)},R> f) {
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> of(\{className}<\{types(fN)},R> f) {
         return f::apply;
     }
 
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f) {
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f) {
         return throwing(f,"{0}; args:(\{argsTemplate(fN)})");
     }
 
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f, String format) {
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f, String format) {
         return throwing(f,format,RuntimeException::new);
     }
 
-    static <\{types(fN)},R> Function\{fN}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
         return (\{args(fN)})->{
             try {
                 return f.apply(\{args(fN)});
