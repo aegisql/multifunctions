@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.generator;
 
 import static com.aegisql.multifunction.generator.ArgUtils.*;
@@ -16,6 +21,11 @@ public class FunctionGenerator {
         String applyArgs = generateApplyArgs(className, prevClassName, fN);
 
         String code = STR."""
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
@@ -106,7 +116,17 @@ public interface Function\{fN} <\{types(fN)},R> {
             }
         };
     }
-
+    \{isLast ? "/*":""}
+    static <\{types(fN)},R> \{className}<\{types(fN)},R> throwing(Throwing<\{types(fN)},R> f, \{nextClassName}<? super Exception,\{types(fN)},R> errorProcessor) {
+        return (\{args(fN)})->{
+            try {
+                return f.apply(\{args(fN)});
+            } catch (Exception e) {
+                return errorProcessor.apply(e,\{args(fN)});
+            }
+        };
+    }
+    \{isLast ? "*/":""}
 }
                 """;
         System.out.println(code);

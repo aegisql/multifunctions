@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
@@ -98,4 +103,13 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
         };
     }
 
+    static <A1,A2,R> Function2<A1,A2,R> throwing(Throwing<A1,A2,R> f, Function3<? super Exception,A1,A2,R> errorProcessor) {
+        return (a1,a2)->{
+            try {
+                return f.apply(a1,a2);
+            } catch (Exception e) {
+                return errorProcessor.apply(e,a1,a2);
+            }
+        };
+    }
 }

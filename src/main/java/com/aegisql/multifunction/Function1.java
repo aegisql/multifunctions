@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Optional;
@@ -110,6 +115,16 @@ public interface Function1 <A1,R> extends Function<A1,R> {
                 return f.apply(a);
             } catch (Exception e) {
                 throw exceptionFactory.apply(handleException(e,format,a),e);
+            }
+        };
+    }
+
+    static <A1,R> Function1<A1,R> throwing(Throwing<A1,R>  f, Function2<? super Exception,A1,R> errorProcessor) {
+        return a->{
+            try {
+                return f.apply(a);
+            } catch (Exception e) {
+                return errorProcessor.apply(e,a);
             }
         };
     }

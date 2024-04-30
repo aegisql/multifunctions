@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.function.BiConsumer;
@@ -68,6 +73,16 @@ public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
                 f.accept(a1,a2);
             } catch (Exception e) {
                 throw exceptionFactory.apply(handleException(e,format,a1,a2),e);
+            }
+        };
+    }
+
+    static <A1,A2> Consumer2<A1,A2> throwing(Throwing<A1,A2> f, Consumer3<A1,A2,? super Exception> errorConsumer) {
+        return (a1,a2)->{
+            try {
+                f.accept(a1,a2);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,e);
             }
         };
     }

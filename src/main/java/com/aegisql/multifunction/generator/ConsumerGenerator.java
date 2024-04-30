@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.generator;
 
 import static com.aegisql.multifunction.generator.ArgUtils.*;
@@ -16,6 +21,11 @@ public class ConsumerGenerator {
         String acceptArgs = generateAcceptArgs(className, prevClassName, fN);
 
         String code = STR."""
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
@@ -82,7 +92,17 @@ public interface Consumer\{fN} <\{types(fN)}> {
             }
         };
     }
-
+    \{isLast ? "/*":""}
+    static <\{types(fN)}> \{className}<\{types(fN)}> throwing(Throwing<\{types(fN)}> f, \{nextClassName}<\{types(fN)},? super Exception> errorConsumer) {
+        return (\{args(fN)})->{
+            try {
+                f.accept(\{args(fN)});
+            } catch (Exception e) {
+                errorConsumer.accept(\{args(fN)},e);
+            }
+        };
+    }
+    \{isLast ? "*/":""}
 }
                 """;
         System.out.println(code);

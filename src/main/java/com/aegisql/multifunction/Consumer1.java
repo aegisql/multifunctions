@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.function.Consumer;
@@ -63,6 +68,16 @@ public interface Consumer1<A1> extends Consumer<A1> {
                 f.accept(a1);
             } catch (Exception e) {
                 throw exceptionFactory.apply(handleException(e,format,a1),e);
+            }
+        };
+    }
+
+    static <A1> Consumer1<A1> throwing(Throwing<A1> f, Consumer2<A1,? super Exception> errorConsumer) {
+        return (a1)->{
+            try {
+                f.accept(a1);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,e);
             }
         };
     }

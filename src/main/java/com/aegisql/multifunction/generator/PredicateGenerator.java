@@ -1,3 +1,8 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.generator;
 
 import static com.aegisql.multifunction.generator.ArgUtils.*;
@@ -9,6 +14,11 @@ public class PredicateGenerator {
         String className = "Predicate"+functionNumber;
 
         String code = STR."""
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
