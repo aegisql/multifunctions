@@ -1,10 +1,5 @@
 package com.aegisql.multifunction.generator;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static com.aegisql.multifunction.generator.ArgUtils.*;
 
 public class FunctionGenerator {
@@ -40,7 +35,7 @@ public interface Function\{fN} <\{types(fN)},R> {
     R apply(\{typedArgs(fN)});
 
     default SupplierExt<R> lazyApply(\{typedArgs(fN)}) {
-        return \{lazyArgs(fN)};
+        return \{lazyApplyArgs(fN)};
     }
     \{applyArgs}
     \{isLast ? "/*":""}

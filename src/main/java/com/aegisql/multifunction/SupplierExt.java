@@ -1,7 +1,6 @@
 package com.aegisql.multifunction;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.handleException;
@@ -43,6 +42,21 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    default SupplierExt<R> before(RunnableExt before) {
+        return ()-> {
+            before.run();
+            return this.get();
+        };
+    }
+
+    default SupplierExt<R> after(Consumer1<R> after) {
+        return ()-> {
+            var result = this.get();
+            after.accept(result);
+            return result;
+        };
+    }
+
     static <A> SupplierExt<A> of(Supplier<A> supplier) {
         return supplier::get;
     }
@@ -68,5 +82,16 @@ public interface SupplierExt<R> extends Supplier<R> {
             }
         };
     }
+
+    static <A> SupplierExt<A> throwing(Throwing<A> f, Function1<? super Exception,A> errorConsumer) {
+        return ()->{
+            try {
+                return f.get();
+            } catch (Exception e) {
+                return errorConsumer.apply(e);
+            }
+        };
+    }
+
 
 }

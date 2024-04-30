@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.List;
 
 public class ArgUtils {
 
@@ -38,10 +37,18 @@ public class ArgUtils {
         return applyTemplate("? super A{0}",n);
     }
 
-    public static String lazyArgs(int n) {
+    public static String lazyApplyArgs(int n) {
         StringBuilder lazyApplyArgListBuilder = new StringBuilder("applyArg1(a1)");
         for (int i = 2; i <= n; i++) {
             lazyApplyArgListBuilder.append(".").append("applyArg1(a"+i+")");
+        }
+        return lazyApplyArgListBuilder.toString();
+    }
+
+    public static String lazyAcceptArgs(int n) {
+        StringBuilder lazyApplyArgListBuilder = new StringBuilder("acceptArg1(a1)");
+        for (int i = 2; i <= n; i++) {
+            lazyApplyArgListBuilder.append(".").append("acceptArg1(a"+i+")");
         }
         return lazyApplyArgListBuilder.toString();
     }

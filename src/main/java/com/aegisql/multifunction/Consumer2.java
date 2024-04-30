@@ -28,7 +28,6 @@ public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
     default Consumer1<A1> acceptArg2(Supplier<A2> a2Supplier) {
         return (a1)->this.accept(a1,a2Supplier.get());
     }
-
     default <X> Consumer3<X,A1,A2> uncurry() {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }

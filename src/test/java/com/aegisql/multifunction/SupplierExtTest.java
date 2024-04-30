@@ -44,4 +44,21 @@ class SupplierExtTest {
         assertEquals("ERROR",error.get());
     }
 
+    @Test
+    public void exceptionTest2() {
+        SupplierExt<String> throwing = SupplierExt.throwing(this::getEx,e->{
+            return "SOMETHING WRONG";
+        });
+        assertEquals("SOMETHING WRONG",throwing.get());
+    }
+
+    @Test
+    public void beforeAfterTest() {
+        SupplierExt<String> s = SupplierExt.of(this::getVal).before(() -> {
+            System.out.println("ready to execute getVal()");
+        }).after(res -> System.out.println("getVal() returned " + res));
+        String res = s.get();
+        assertEquals("VALUE",res);
+    }
+
 }

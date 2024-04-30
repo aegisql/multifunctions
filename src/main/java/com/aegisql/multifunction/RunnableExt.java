@@ -11,6 +11,20 @@ public interface RunnableExt extends Runnable {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
+    default RunnableExt before(RunnableExt before) {
+        return ()-> {
+            before.run();
+            this.run();
+        };
+    }
+
+    default RunnableExt after(RunnableExt after) {
+        return ()-> {
+            this.run();
+            after.run();
+        };
+    }
+
     static RunnableExt of(Runnable runnable) {
         return runnable::run;
     }
@@ -33,4 +47,13 @@ public interface RunnableExt extends Runnable {
         };
     }
 
+    static RunnableExt throwing(Throwing f, Consumer1<? super Exception> errorConsumer) {
+        return ()->{
+            try {
+                f.run();
+            } catch (Exception e) {
+                errorConsumer.accept(e);
+            }
+        };
+    }
 }

@@ -33,7 +33,12 @@ class ArgUtilsTest {
 
     @Test
     void lazyArgs() {
-        assertEquals("applyArg1(a1).applyArg1(a2).applyArg1(a3).applyArg1(a4)", ArgUtils.lazyArgs(4));
+        assertEquals("applyArg1(a1).applyArg1(a2).applyArg1(a3).applyArg1(a4)", ArgUtils.lazyApplyArgs(4));
+    }
+
+    @Test
+    void lazyArgsAccept() {
+        assertEquals("acceptArg1(a1).acceptArg1(a2).acceptArg1(a3).acceptArg1(a4)", ArgUtils.lazyAcceptArgs(4));
     }
 
     @Test

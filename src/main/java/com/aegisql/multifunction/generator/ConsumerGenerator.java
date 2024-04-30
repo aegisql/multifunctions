@@ -1,77 +1,141 @@
 package com.aegisql.multifunction.generator;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import static com.aegisql.multifunction.generator.ArgUtils.*;
 
 public class ConsumerGenerator {
 
-    private static void generate(int functionNumber) throws IOException {
+    private static void generate(int fN, boolean isLast) {
 
-        String className = STR."Consumer\{functionNumber}";
+        int prevFN = fN - 1;
+        int nextFN = fN + 1;
 
-        StringBuilder typeListBuilder = new StringBuilder("A1");
-        for (int i = 2; i <= functionNumber; i++) {
-            typeListBuilder.append(",").append("A").append(i);
-        }
+        String className = STR."Consumer\{fN}";
+        String prevClassName = STR."Consumer\{prevFN}"; //for accept arg
+        String nextClassName = STR."Consumer\{nextFN}"; //for uncurry
 
-        StringBuilder argListBuilder = new StringBuilder("A1 a1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argListBuilder.append(", ").append("A").append(i).append(" a").append(i);
-        }
-
-        StringBuilder argShortListBuilder = new StringBuilder("a1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argShortListBuilder.append(",").append("a").append(i);
-        }
-
-        StringBuilder argSuperListBuilder = new StringBuilder("? super A1");
-        for (int i = 2; i <= functionNumber; i++) {
-            argSuperListBuilder.append(", ").append("? super A").append(i);
-        }
+        String acceptArgs = generateAcceptArgs(className, prevClassName, fN);
 
         String code = STR."""
 package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
-@FunctionalInterface
-public interface \{className}<\{typeListBuilder.toString()}> {
-    boolean test(\{argListBuilder.toString()});
+import static com.aegisql.multifunction.Utils.*;
 
-    default \{className}<\{typeListBuilder.toString()}> and(\{className}<\{argSuperListBuilder.toString()}> other) {
-        Objects.requireNonNull(other);
-        return (\{argShortListBuilder.toString()}) -> test(\{argShortListBuilder.toString()}) && other.test(\{argShortListBuilder.toString()});
+public interface Consumer\{fN} <\{types(fN)}> {
+
+    @FunctionalInterface
+    interface Throwing<\{types(fN)}>{ void accept(\{typedArgs(fN)}) throws Exception; }
+
+    void accept(\{typedArgs(fN)});
+
+    default RunnableExt lazyAccept(\{typedArgs(fN)}) {
+        return \{lazyAcceptArgs(fN)};
+    }
+    \{acceptArgs}
+    \{isLast ? "/*":""}
+    default <X> \{nextClassName}<X,\{types(fN)}> uncurry() {
+        throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
+    }
+    \{isLast ? "*/":""}
+    @SafeVarargs
+    static <\{types(fN)}> \{className}<\{types(fN)}> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)}>... functions) {
+        Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");
+        var finalFunctions = validatedArrayCopy(functions,"\{className}");
+        return (\{args(fN)}) -> arrayValue(dispatchFunction.applyAsInt(\{args(fN)}),finalFunctions).accept(\{args(fN)});
     }
 
-    default \{className}<\{typeListBuilder.toString()}> negate() {
-        return (\{argShortListBuilder.toString()}) -> !test(\{argShortListBuilder.toString()});
+    static <\{types(fN)}> \{className}<\{types(fN)}> dispatch(Predicate\{fN}<\{superTypes(fN)}> dispatchPredicate, \{className}<\{superTypes(fN)}> function1, \{className}<\{superTypes(fN)}> function2) {
+        requiresNotNullArgs(dispatchPredicate,function1,function2,"\{className}");
+        return (\{args(fN)}) -> {
+            if(dispatchPredicate.test(\{args(fN)})) {
+                function1.accept(\{args(fN)});
+            } else {
+                function2.accept(\{args(fN)});
+            }
+        };
     }
 
-    default \{className}<\{typeListBuilder.toString()}> or(\{className}<\{argSuperListBuilder.toString()}> other) {
-        Objects.requireNonNull(other);
-        return (\{argShortListBuilder.toString()}) -> test(\{argShortListBuilder.toString()}) || other.test(\{argShortListBuilder.toString()});
+    static <\{types(fN)}> \{className}<\{types(fN)}> of(\{className}<\{types(fN)}> f) {
+        return f::accept;
     }
+
+    static <\{types(fN)}> \{className}<\{types(fN)}> throwing(Throwing<\{types(fN)}> f) {
+        return throwing(f,"{0}; args:(\{argsTemplate(fN)})");
+    }
+
+    static <\{types(fN)}> \{className}<\{types(fN)}> throwing(Throwing<\{types(fN)}> f, String format) {
+        return throwing(f,format, RuntimeException::new);
+    }
+
+    static <\{types(fN)}> \{className}<\{types(fN)}> throwing(Throwing<\{types(fN)}> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
+        return (\{args(fN)})->{
+            try {
+                f.accept(\{args(fN)});
+            } catch (Exception e) {
+                throw exceptionFactory.apply(handleException(e,format,\{args(fN)}),e);
+            }
+        };
+    }
+
 }
                 """;
         System.out.println(code);
 
-        Path path = Path.of("src/main/java/com/aegisql/multifunction/tmp/"+className+".java");
-        Files.writeString(path,code, StandardCharsets.UTF_8);
+        ArgUtils.saveClass(className,code);
 
     }
 
-    public static void main(String[] args) {
-        try {
-            for(int i = 3; i <=10; i++) {
-                generate(i);
+    private static String generateAcceptArgs(String currentClass, String prevClass, int n) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 1; i <= n; i++) {
+            sb.append(STR."""
+    default \{prevClass}<\{applyedTypes(i,n)}> acceptArg\{i}(A\{i} a\{i}) {
+        var f = this;
+        return new \{prevClass}<>() {
+            @Override
+            public void accept(\{applyedTypedArgs(i,n)}) {
+                f.accept(\{args(n)});
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(2);
+            @SuppressWarnings("unchecked")
+            @Override
+            public \{currentClass}<\{types(n)}> uncurry() {
+                return f;
+            }
+        };
+    }
+    default \{prevClass}<\{applyedTypes(i,n)}> acceptArg\{i}(Supplier<A\{i}> a\{i}Supplier) {
+        var f = this;
+        return new \{prevClass}<>() {
+            @Override
+            public void accept(\{applyedTypedArgs(i,n)}) {
+                f.accept(\{applySupplierArg(i,n)});
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public \{currentClass}<\{types(n)}> uncurry() {
+                return f;
+            }
+        };
+    }
+                    """);
         }
+        return sb.toString();
+    }
 
+    final static int MIN_FUNCTION_NUMBER = 3;
+    final static int MAX_FUNCTION_NUMBER = 10;
+
+    public static void main(String[] args) {
+
+            for(int i = MIN_FUNCTION_NUMBER; i <=MAX_FUNCTION_NUMBER; i++) {
+                generate(i,i==MAX_FUNCTION_NUMBER);
+            }
     }
 
 }
