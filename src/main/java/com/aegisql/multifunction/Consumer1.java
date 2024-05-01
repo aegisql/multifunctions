@@ -22,10 +22,32 @@ public interface Consumer1<A1> extends Consumer<A1> {
         return acceptArg1(a1);
     }
     default RunnableExt acceptArg1(A1 a1) {
-        return ()->this.accept(a1);
+        var f = this;
+        return new RunnableExt() {
+            @Override
+            public void run() {
+                accept(a1);
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer1<A1> uncurry() {
+                return f;
+            }
+        };
     }
     default RunnableExt acceptArg1(Supplier<A1> a1Supplier) {
-        return ()->this.accept(a1Supplier.get());
+        var f = this;
+        return new RunnableExt() {
+            @Override
+            public void run() {
+                accept(a1Supplier.get());
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer1<A1> uncurry() {
+                return f;
+            }
+        };
     }
 
     default <X> Consumer2<X,A1> uncurry() {

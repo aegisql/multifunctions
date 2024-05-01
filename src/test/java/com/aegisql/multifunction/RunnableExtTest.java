@@ -51,6 +51,23 @@ class RunnableExtTest {
     }
 
     @Test
+    public void uncurryTest() {
+        assertThrows(RuntimeException.class,()->RunnableExt.throwing(this::runMe).uncurry());
+        RunnableExt testUncurry = Consumer1.of(a -> {
+            System.out.println(a);
+        }).acceptArg1("TEST_UNCURRY_1");
+        testUncurry.run();
+        testUncurry.uncurry().accept("TEST_UNCURRY_2");
+
+        RunnableExt testUncurry2 = Consumer1.of(a -> {
+            System.out.println(a);
+        }).acceptArg1(()->"TEST_UNCURRY_3");
+        testUncurry2.run();
+        testUncurry2.uncurry().accept("TEST_UNCURRY_4");
+
+    }
+
+    @Test
     public void beforeAfterTest() {
         RunnableExt s = RunnableExt.of(this::doSomething).before(() -> {
             System.out.println("ready to execute doSomething()");
