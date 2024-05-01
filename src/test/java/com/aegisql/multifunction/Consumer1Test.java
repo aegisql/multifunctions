@@ -76,6 +76,12 @@ class Consumer1Test {
         a0C1.run();
         assertEquals("CM1:C1",cm1.getValConcat());
 
+        Consumer1<Object> uncurry = a1A1.uncurry();
+        uncurry.accept(new B1());
+        Consumer1<Object> uncurry1 = a1B1.uncurry();
+        uncurry1.accept(new C1());
+
+        assertThrows(RuntimeException.class,()->c1.uncurry());
 
     }
 
@@ -87,4 +93,29 @@ class Consumer1Test {
         assertEquals("CM1:A1",cm1.getValConcat());
         assertThrows(RuntimeException.class,()->c1.accept(null));
     }
+
+    @Test
+    public void throwingTest2() {
+        var cm1 = new ConsumerMethods1();
+        var c1 = Consumer1.throwing(cm1::c1E,(v,e)->{
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        });
+        c1.accept(new A1());
+        assertEquals("CM1:A1",cm1.getValConcat());
+        assertThrows(RuntimeException.class,()->c1.accept(null));
+    }
+
+    @Test
+    public void beforeAfterTest() {
+        var cm1 = new ConsumerMethods1();
+        Consumer1<AA> c = Consumer1.of(cm1::c1);
+        Consumer1<AA> c2 = c.before(aa -> {
+            System.out.println("Ready to consume " + aa);
+        }).after(aa -> {
+            System.out.println("Successfully consumed " + aa);
+        });
+        c2.accept(new A1());
+    }
+
 }
