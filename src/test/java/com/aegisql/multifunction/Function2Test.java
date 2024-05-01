@@ -1,147 +1,128 @@
 package com.aegisql.multifunction;
 
+import com.aegisql.multifunction.harness.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class Function2Test {
 
-    public String greet(String s, Integer i) {
-        return s+"="+i;
-    }
+    FunctionMethods1 fm1;
+    FunctionMethods2 fm2;
+    FunctionMethods3 fm3;
 
-    public String sum(int x, int y) {
-        return "Summa "+x+"+"+y+"="+(x+y);
-    }
-
-    public String mul(int x, int y) {
-        return "Prod "+x+"*"+y+"="+(x*y);
-    }
-
-    public String pow(int x, int y) {
-        return "Pow "+x+"^"+y+"="+Math.pow(x,y);
+    @BeforeEach
+    void setUp() {
+        fm1= new FunctionMethods1();
+        fm2= new FunctionMethods2();
+        fm3= new FunctionMethods3();
     }
 
     @Test
-    public void function2Test() {
-
-        BiFunction<Integer, Integer, String> dispatch = Function2.dispatch(
-                (x, y) -> x % 3,
-                this::sum,
-                this::mul,
-                this::pow
-        );
-
-        System.out.println(dispatch.apply(5,5));
-        System.out.println(dispatch.apply(6,6));
-        System.out.println(dispatch.apply(7,7));
-
+    void lazyApply() {
+        Function2<AA, A2, String> f = Function2.of(fm1::f2);
+        SupplierExt<String> s = f.lazyApply(new A1(), new A2());
+        assertEquals("FM1:A1A2",s.get());
     }
 
     @Test
-    public void function2PredTest() {
-
-        BiFunction<Integer, Integer, String> dispatch = Function2.dispatch(
-                (x, y) -> x % 2 == 0 ? true:false,
-                this::sum,
-                this::mul
-        );
-
-        System.out.println(dispatch.apply(5,5));
-        System.out.println(dispatch.apply(6,6));
-        System.out.println(dispatch.apply(7,7));
-
-    }
-
-    private String test = "field value";
-
-    @Test
-    public void universalGetterTest() {
-
-        var dispatch = Function2.dispatch(
-                (id, obj) -> switch (obj) {
-                    case null -> throw new NullPointerException();
-                    case Map m -> 0;
-                    case List l -> 1;
-                    default -> 2;
-                },
-                (id, obj) -> ((Map) obj).get(id),
-                (id, obj) -> ((List) obj).get((Integer) id),
-                (id, obj) -> {
-                    try {
-                        Field field = obj.getClass().getDeclaredField(id.toString());
-                        return field.get(obj);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-        );
-
-        Map<String,String> m = new HashMap<>();
-        m.put("test","map value");
-        List<String> l = new ArrayList<>();
-        l.add("list value");
-
-        System.out.println(dispatch.apply("test",m));
-        System.out.println(dispatch.apply(0,l));
-        System.out.println(dispatch.apply("test",this));
-
+    void applyArg1() {
+        Function2<AA, A2, String> f = Function2.of(fm1::f2);
+        Function1<A2, String> f1 = f.applyArg1(new A1());
+        assertEquals("FM1:A1A2",f1.apply(new A2()));
     }
 
     @Test
-    public void understandCurring() {
-        Function2<String, Integer, String> greet = Function2.of(this::greet);
-        System.out.println(greet.apply("X",5));
-        Function<String,Function<Integer,String>> partialGreet = s->i->greet(s,i);
-        Function<Integer, String> xEq = partialGreet.apply("X");
-        String val = xEq.apply(100);
-        System.out.println(val);
-        assertEquals("X=100",val);
+    void testApplyArg1() {
+        Function2<AA, A2, String> f = Function2.of(fm1::f2);
+        Function1<A2, String> f1 = f.applyArg1(B1::new);
+        assertEquals("FM1:B1A2",f1.apply(new A2()));
     }
 
     @Test
-    public void testCurry1() {
-        Function2<String, Integer, String> greet = Function2.of(this::greet);
-        System.out.println(greet.apply("X",5));
-        Function1<Integer, String> xEq = greet.applyArg1("X");
-        String val = xEq.apply(100);
-        System.out.println(val);
-        assertEquals("X=100",val);
+    void applyArg2() {
+        Function2<AA, A2, String> f = Function2.of(fm2::f2);
+        Function1<AA, String> f1 = f.applyArg2(new A2());
+        assertEquals("FM2:A2A2",f1.apply(new A2()));
+    }
 
-        Function1<String, String> yEq = greet.applyArg2(200);
-        String y = yEq.apply("Y");
-        System.out.println(y);
-        assertEquals("Y=200",y);
+    @Test
+    void testApplyArg2() {
+        Function2<AA, A2, String> f = Function2.of(fm2::f2);
+        Function1<AA, String> f1 = f.applyArg2(A2::new);
+        assertEquals("FM2:A3A2",f1.apply(new A3()));
+    }
+
+    @Test
+    void uncurry() {
+        Function2<AA, A2, String> f = Function2.of(fm1::f2);
+        assertThrows(RuntimeException.class,f::uncurry);
+    }
+
+    @Test
+    void optional() {
+        Function2<AA, A2, Optional<String>> o = Function2.throwing(fm3::f2E).optional();
+        assertEquals("FM3:A1A2",o.apply(new A1(),new A2()).get());
+        assertTrue(o.apply(null,new A2()).isEmpty());
+    }
+
+    @Test
+    void orElse() {
+        Function2<AA, A2, String> f = Function2.throwing(fm3::f2E).orElse("ERROR");
+        assertEquals("FM3:A1A2",f.apply(new A1(),new A2()));
+        assertEquals("ERROR",f.apply(new A1(),null));
+    }
+
+    @Test
+    void testOrElse() {
+        Function2<AA, A2, String> f = Function2.throwing(fm3::f2E).orElse(()->"ERROR");
+        assertEquals("FM3:A1A2",f.apply(new A1(),new A2()));
+        assertEquals("ERROR",f.apply(new A1(),null));
+    }
+
+    @Test
+    void beforeAndAfter() {
+        Function2<AA, A2, String> f = Function2.of(fm1::f2)
+                .before((a1,a2)->{System.out.println("Ready to process "+a1+" and "+a2);})
+                .after((a1,a2,r)->{System.out.println("F2("+a1+","+a2+")="+r);})
+                ;
+        assertEquals("FM1:A1A2",f.apply(new A1(),new A2()));
     }
 
     @Test
     void dispatch() {
-        var dispatch = Function2.dispatch((a,b) -> (a instanceof Number) && (b instanceof Number)
-                , (a,b) -> {
-            return "Number: "+(((Number)a).doubleValue()+((Number)b).doubleValue());
-        },(a,b) -> {
-            return "Other: " + a + b;
-        });
+        Function2<AA, A2, String> dispatch = Function2.dispatch((aa, a2) -> switch (aa) {
+            case A1 a1 -> 0;
+            case B1 b1 -> 1;
+            case C1 c1 -> 2;
+            default -> -1;
+        }, fm1::f2, fm2::f2, fm3::f2);
 
-        assertEquals("Other: ab",dispatch.apply("a","b"));
-        assertEquals("Number: 3.0",dispatch.apply(1,2));
-        assertEquals("Number: 4.6",dispatch.apply(1.0,3.6));
-
+        assertEquals("FM1:A1A2",dispatch.apply(new A1(),new A2()));
+        assertEquals("FM2:B1A2",dispatch.apply(new B1(),new A2()));
+        assertEquals("FM3:C1A2",dispatch.apply(new C1(),new A2()));
+        assertThrows(RuntimeException.class,()->{dispatch.apply(new D1(),new A2());});
     }
 
     @Test
     void testDispatch() {
+        Function2<AA, A2, String> dispatch = Function2.dispatch((aa, a2) -> aa instanceof A1, fm1::f2, fm2::f2);
+
+        assertEquals("FM1:A1A2",dispatch.apply(new A1(),new A2()));
+        assertEquals("FM2:B1A2",dispatch.apply(new B1(),new A2()));
+        assertEquals("FM2:C1A2",dispatch.apply(new C1(),new A2()));
     }
 
-
-
+    @Test
+    void throwing() {
+        Function2<AA, A2, String> f = Function2.throwing(fm3::f2E,(e,a1,a2)->{
+            return a1+","+a2+" - WRONG VALUES";
+        });
+        String s = f.apply(null, null);
+        assertEquals("null,null - WRONG VALUES",s);
+    }
 
 }
