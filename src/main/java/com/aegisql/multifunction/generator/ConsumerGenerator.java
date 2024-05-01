@@ -29,11 +29,7 @@ public class ConsumerGenerator {
 package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.Supplier;
-import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
