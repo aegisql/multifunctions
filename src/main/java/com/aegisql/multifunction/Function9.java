@@ -1,8 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -298,6 +306,21 @@ default Function8<A1,A2,A3,A4,A5,A6,A7,A8,R> applyArg9(Supplier<A9> a9Supplier) 
         };
     }
 
+    default Function9<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> before(Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> before) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)-> {
+            before.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            return apply(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+        };
+    }
+    
+    default Function9<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> after(Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> after) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)-> {
+            var result = apply(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,result);
+            return result;
+        };
+    }
+    
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,A8,A9,R> Function9<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> dispatch(ToInt9Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9> dispatchFunction, Function9<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function9 expects a dispatch function");
@@ -337,5 +360,15 @@ default Function8<A1,A2,A3,A4,A5,A6,A7,A8,R> applyArg9(Supplier<A9> a9Supplier) 
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4,A5,A6,A7,A8,A9,R> Function9<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> throwing(Throwing<A1,A2,A3,A4,A5,A6,A7,A8,A9,R> f, Function10<? super Exception,A1,A2,A3,A4,A5,A6,A7,A8,A9,R> errorProcessor) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)->{
+            try {
+                return f.apply(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            } catch (Exception e) {
+                return errorProcessor.apply(e,a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            }
+        };
+    }
+    
 }

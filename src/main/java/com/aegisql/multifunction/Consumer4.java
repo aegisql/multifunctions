@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -133,6 +142,20 @@ default Consumer3<A1,A2,A3> acceptArg4(Supplier<A4> a4Supplier) {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     
+    default Consumer4<A1,A2,A3,A4> before(Consumer4<? super A1,? super A2,? super A3,? super A4> before) {
+        return (a1,a2,a3,a4)-> {
+            before.accept(a1,a2,a3,a4);
+            this.accept(a1,a2,a3,a4);
+        };
+    }
+
+    default Consumer4<A1,A2,A3,A4>  after(Consumer4<? super A1,? super A2,? super A3,? super A4> after) {
+        return (a1,a2,a3,a4)-> {
+            this.accept(a1,a2,a3,a4);
+            after.accept(a1,a2,a3,a4);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3,A4> Consumer4<A1,A2,A3,A4> dispatch(ToInt4Function<? super A1,? super A2,? super A3,? super A4> dispatchFunction, Consumer4<? super A1,? super A2,? super A3,? super A4>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer4 expects a dispatch function");
@@ -172,5 +195,15 @@ default Consumer3<A1,A2,A3> acceptArg4(Supplier<A4> a4Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4> Consumer4<A1,A2,A3,A4> throwing(Throwing<A1,A2,A3,A4> f, Consumer5<A1,A2,A3,A4,? super Exception> errorConsumer) {
+        return (a1,a2,a3,a4)->{
+            try {
+                f.accept(a1,a2,a3,a4);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,a4,e);
+            }
+        };
+    }
+    
 }

@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -273,6 +282,20 @@ default Consumer8<A1,A2,A3,A4,A5,A6,A7,A8> acceptArg9(Supplier<A9> a9Supplier) {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     
+    default Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> before(Consumer9<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9> before) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)-> {
+            before.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+        };
+    }
+
+    default Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9>  after(Consumer9<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9> after) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)-> {
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,A8,A9> Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> dispatch(ToInt9Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9> dispatchFunction, Consumer9<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer9 expects a dispatch function");
@@ -312,5 +335,15 @@ default Consumer8<A1,A2,A3,A4,A5,A6,A7,A8> acceptArg9(Supplier<A9> a9Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4,A5,A6,A7,A8,A9> Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> throwing(Throwing<A1,A2,A3,A4,A5,A6,A7,A8,A9> f, Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,? super Exception> errorConsumer) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9)->{
+            try {
+                f.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,e);
+            }
+        };
+    }
+    
 }

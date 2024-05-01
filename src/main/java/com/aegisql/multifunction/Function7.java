@@ -1,8 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -242,6 +250,21 @@ default Function6<A1,A2,A3,A4,A5,A6,R> applyArg7(Supplier<A7> a7Supplier) {
         };
     }
 
+    default Function7<A1,A2,A3,A4,A5,A6,A7,R> before(Consumer7<A1,A2,A3,A4,A5,A6,A7> before) {
+        return (a1,a2,a3,a4,a5,a6,a7)-> {
+            before.accept(a1,a2,a3,a4,a5,a6,a7);
+            return apply(a1,a2,a3,a4,a5,a6,a7);
+        };
+    }
+    
+    default Function7<A1,A2,A3,A4,A5,A6,A7,R> after(Consumer8<A1,A2,A3,A4,A5,A6,A7,R> after) {
+        return (a1,a2,a3,a4,a5,a6,a7)-> {
+            var result = apply(a1,a2,a3,a4,a5,a6,a7);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,result);
+            return result;
+        };
+    }
+    
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,R> Function7<A1,A2,A3,A4,A5,A6,A7,R> dispatch(ToInt7Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7> dispatchFunction, Function7<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function7 expects a dispatch function");
@@ -281,5 +304,15 @@ default Function6<A1,A2,A3,A4,A5,A6,R> applyArg7(Supplier<A7> a7Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4,A5,A6,A7,R> Function7<A1,A2,A3,A4,A5,A6,A7,R> throwing(Throwing<A1,A2,A3,A4,A5,A6,A7,R> f, Function8<? super Exception,A1,A2,A3,A4,A5,A6,A7,R> errorProcessor) {
+        return (a1,a2,a3,a4,a5,a6,a7)->{
+            try {
+                return f.apply(a1,a2,a3,a4,a5,a6,a7);
+            } catch (Exception e) {
+                return errorProcessor.apply(e,a1,a2,a3,a4,a5,a6,a7);
+            }
+        };
+    }
+    
 }

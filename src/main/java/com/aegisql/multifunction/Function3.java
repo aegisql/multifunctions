@@ -1,8 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -130,6 +138,21 @@ default Function2<A1,A2,R> applyArg3(Supplier<A3> a3Supplier) {
         };
     }
 
+    default Function3<A1,A2,A3,R> before(Consumer3<A1,A2,A3> before) {
+        return (a1,a2,a3)-> {
+            before.accept(a1,a2,a3);
+            return apply(a1,a2,a3);
+        };
+    }
+    
+    default Function3<A1,A2,A3,R> after(Consumer4<A1,A2,A3,R> after) {
+        return (a1,a2,a3)-> {
+            var result = apply(a1,a2,a3);
+            after.accept(a1,a2,a3,result);
+            return result;
+        };
+    }
+    
     @SafeVarargs
     static <A1,A2,A3,R> Function3<A1,A2,A3,R> dispatch(ToInt3Function<? super A1,? super A2,? super A3> dispatchFunction, Function3<? super A1,? super A2,? super A3,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function3 expects a dispatch function");
@@ -169,5 +192,15 @@ default Function2<A1,A2,R> applyArg3(Supplier<A3> a3Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,R> Function3<A1,A2,A3,R> throwing(Throwing<A1,A2,A3,R> f, Function4<? super Exception,A1,A2,A3,R> errorProcessor) {
+        return (a1,a2,a3)->{
+            try {
+                return f.apply(a1,a2,a3);
+            } catch (Exception e) {
+                return errorProcessor.apply(e,a1,a2,a3);
+            }
+        };
+    }
+    
 }

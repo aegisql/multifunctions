@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -189,6 +198,20 @@ default Consumer5<A1,A2,A3,A4,A5> acceptArg6(Supplier<A6> a6Supplier) {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     
+    default Consumer6<A1,A2,A3,A4,A5,A6> before(Consumer6<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6> before) {
+        return (a1,a2,a3,a4,a5,a6)-> {
+            before.accept(a1,a2,a3,a4,a5,a6);
+            this.accept(a1,a2,a3,a4,a5,a6);
+        };
+    }
+
+    default Consumer6<A1,A2,A3,A4,A5,A6>  after(Consumer6<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6> after) {
+        return (a1,a2,a3,a4,a5,a6)-> {
+            this.accept(a1,a2,a3,a4,a5,a6);
+            after.accept(a1,a2,a3,a4,a5,a6);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6> Consumer6<A1,A2,A3,A4,A5,A6> dispatch(ToInt6Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6> dispatchFunction, Consumer6<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer6 expects a dispatch function");
@@ -228,5 +251,15 @@ default Consumer5<A1,A2,A3,A4,A5> acceptArg6(Supplier<A6> a6Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4,A5,A6> Consumer6<A1,A2,A3,A4,A5,A6> throwing(Throwing<A1,A2,A3,A4,A5,A6> f, Consumer7<A1,A2,A3,A4,A5,A6,? super Exception> errorConsumer) {
+        return (a1,a2,a3,a4,a5,a6)->{
+            try {
+                f.accept(a1,a2,a3,a4,a5,a6);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,a4,a5,a6,e);
+            }
+        };
+    }
+    
 }

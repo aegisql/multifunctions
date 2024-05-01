@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -105,6 +114,20 @@ default Consumer2<A1,A2> acceptArg3(Supplier<A3> a3Supplier) {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     
+    default Consumer3<A1,A2,A3> before(Consumer3<? super A1,? super A2,? super A3> before) {
+        return (a1,a2,a3)-> {
+            before.accept(a1,a2,a3);
+            this.accept(a1,a2,a3);
+        };
+    }
+
+    default Consumer3<A1,A2,A3>  after(Consumer3<? super A1,? super A2,? super A3> after) {
+        return (a1,a2,a3)-> {
+            this.accept(a1,a2,a3);
+            after.accept(a1,a2,a3);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3> Consumer3<A1,A2,A3> dispatch(ToInt3Function<? super A1,? super A2,? super A3> dispatchFunction, Consumer3<? super A1,? super A2,? super A3>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer3 expects a dispatch function");
@@ -144,5 +167,15 @@ default Consumer2<A1,A2> acceptArg3(Supplier<A3> a3Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3> Consumer3<A1,A2,A3> throwing(Throwing<A1,A2,A3> f, Consumer4<A1,A2,A3,? super Exception> errorConsumer) {
+        return (a1,a2,a3)->{
+            try {
+                f.accept(a1,a2,a3);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,e);
+            }
+        };
+    }
+    
 }

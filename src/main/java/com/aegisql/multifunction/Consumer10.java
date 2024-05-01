@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -301,6 +310,20 @@ default Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> acceptArg10(Supplier<A10> a10Suppl
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     */
+    default Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> before(Consumer10<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10> before) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)-> {
+            before.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+        };
+    }
+
+    default Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>  after(Consumer10<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10> after) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)-> {
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> dispatch(ToInt10Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10> dispatchFunction, Consumer10<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer10 expects a dispatch function");
@@ -340,5 +363,15 @@ default Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,A9> acceptArg10(Supplier<A10> a10Suppl
             }
         };
     }
-
+    /*
+    static <A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> Consumer10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> throwing(Throwing<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> f, Consumer11<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,? super Exception> errorConsumer) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)->{
+            try {
+                f.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,e);
+            }
+        };
+    }
+    */
 }

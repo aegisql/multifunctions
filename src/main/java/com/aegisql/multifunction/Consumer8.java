@@ -1,7 +1,16 @@
+/**
+ * Copyright (C) 2024, AEGIS DATA SOLUTIONS
+ * @author Mikhail Teplitskiy
+ * @version 1.0
+ */
 package com.aegisql.multifunction;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
+import java.util.function.ToIntBiFunction;
 
 import static com.aegisql.multifunction.Utils.*;
 
@@ -245,6 +254,20 @@ default Consumer7<A1,A2,A3,A4,A5,A6,A7> acceptArg8(Supplier<A8> a8Supplier) {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
     
+    default Consumer8<A1,A2,A3,A4,A5,A6,A7,A8> before(Consumer8<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8> before) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8)-> {
+            before.accept(a1,a2,a3,a4,a5,a6,a7,a8);
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8);
+        };
+    }
+
+    default Consumer8<A1,A2,A3,A4,A5,A6,A7,A8>  after(Consumer8<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8> after) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8)-> {
+            this.accept(a1,a2,a3,a4,a5,a6,a7,a8);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,a8);
+        };
+    }
+
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,A8> Consumer8<A1,A2,A3,A4,A5,A6,A7,A8> dispatch(ToInt8Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8> dispatchFunction, Consumer8<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8>... functions) {
         Objects.requireNonNull(dispatchFunction,"Consumer8 expects a dispatch function");
@@ -284,5 +307,15 @@ default Consumer7<A1,A2,A3,A4,A5,A6,A7> acceptArg8(Supplier<A8> a8Supplier) {
             }
         };
     }
-
+    
+    static <A1,A2,A3,A4,A5,A6,A7,A8> Consumer8<A1,A2,A3,A4,A5,A6,A7,A8> throwing(Throwing<A1,A2,A3,A4,A5,A6,A7,A8> f, Consumer9<A1,A2,A3,A4,A5,A6,A7,A8,? super Exception> errorConsumer) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8)->{
+            try {
+                f.accept(a1,a2,a3,a4,a5,a6,a7,a8);
+            } catch (Exception e) {
+                errorConsumer.accept(a1,a2,a3,a4,a5,a6,a7,a8,e);
+            }
+        };
+    }
+    
 }
