@@ -19,14 +19,14 @@ public class WalkFileTreeTest {
         Function4<Path, Set<FileVisitOption>, Integer, FileVisitor<Path>, Path> fileTreeWalker = Function4.throwing(Files::walkFileTree);
 
         var noLinkWalker = fileTreeWalker.applyArg2(Collections.emptySet()); // or add FileVisitOption.FOLLOW_LINKS
-        var linkWalker = fileTreeWalker.applyArg2(Set.of(FOLLOW_LINKS)); // or add FileVisitOption.FOLLOW_LINKS
+        var linkWalker = fileTreeWalker.applyArg2(Set.of(FOLLOW_LINKS));
 
         var unlimitedNoLinkWalker = noLinkWalker.applyArg2(Integer.MAX_VALUE);
         var unlimitedLinkWalker = linkWalker.applyArg2(Integer.MAX_VALUE);
 
         var limit10NoLinkWalker = noLinkWalker.applyArg2(10);
 
-        var printingWalker = limit10NoLinkWalker.applyArg2(new FileVisitor<>() {
+        var sizePrintingWalker = limit10NoLinkWalker.applyArg2(new FileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 System.out.println("Directory: " + dir);
@@ -35,7 +35,7 @@ public class WalkFileTreeTest {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                System.out.println("\tFile: " + file);
+                System.out.println("\tFile: " + file+ " size:"+attrs.size());
                 return CONTINUE;
             }
 
@@ -54,7 +54,7 @@ public class WalkFileTreeTest {
             }
         });
 
-        Path path = printingWalker.apply(Path.of("./src/main/"));
+        Path path = sizePrintingWalker.apply(Path.of("./src/main/"));
 
         System.out.println("Done: "+path);
 
