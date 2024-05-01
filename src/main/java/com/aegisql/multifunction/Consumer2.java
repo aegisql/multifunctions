@@ -21,18 +21,64 @@ public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
     default Runnable lazyAccept(A1 a1, A2 a2) {
         return acceptArg1(a1).acceptArg1(a2);
     }
+
     default Consumer1<A2> acceptArg1(A1 a1) {
-        return (a2)->this.accept(a1,a2);
+        var f = this;
+        return new Consumer1<>() {
+            @Override
+            public void accept(A2 a2) {
+                f.accept(a1,a2);
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer2<A1,A2> uncurry() {
+                return f;
+            }
+        };
     }
     default Consumer1<A2> acceptArg1(Supplier<A1> a1Supplier) {
-        return (a2)->this.accept(a1Supplier.get(),a2);
+        var f = this;
+        return new Consumer1<>() {
+            @Override
+            public void accept(A2 a2) {
+                f.accept(a1Supplier.get(),a2);
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer2<A1,A2> uncurry() {
+                return f;
+            }
+        };
     }
     default Consumer1<A1> acceptArg2(A2 a2) {
-        return (a1)->accept(a1,a2);
+        var f = this;
+        return new Consumer1<>() {
+            @Override
+            public void accept(A1 a1) {
+                f.accept(a1,a2);
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer2<A1,A2> uncurry() {
+                return f;
+            }
+        };
     }
     default Consumer1<A1> acceptArg2(Supplier<A2> a2Supplier) {
-        return (a1)->this.accept(a1,a2Supplier.get());
+        var f = this;
+        return new Consumer1<>() {
+            @Override
+            public void accept(A1 a1) {
+                f.accept(a1,a2Supplier.get());
+            }
+            @SuppressWarnings("unchecked")
+            @Override
+            public Consumer2<A1,A2> uncurry() {
+                return f;
+            }
+        };
     }
+
     default <X> Consumer3<X,A1,A2> uncurry() {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }

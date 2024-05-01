@@ -60,6 +60,8 @@ class Consumer2Test {
         var cm1 = new ConsumerMethods1();
         var c2 = Consumer2.of(cm1::c2);
 
+        assertThrows(RuntimeException.class, c2::uncurry);
+
         var a1A1 = c2.acceptArg1(new A1());
         var a1B1 = c2.acceptArg1(B1::new);
         var a0A1 = a1A1.acceptArg1(new A2());
@@ -73,8 +75,14 @@ class Consumer2Test {
         assertNotNull(cm1.getValConcat());
         assertEquals("CM1:A1A2",cm1.getValConcat());
 
+        a1A1.uncurry().accept(new B1(),new A2());
+        assertEquals("CM1:B1A2",cm1.getValConcat());
+
         a0B1.run();
         assertEquals("CM1:B1A2",cm1.getValConcat());
+
+        a1B1.uncurry().accept(new C1(),new A2());
+        assertEquals("CM1:C1A2",cm1.getValConcat());
 
         var a0C1 = c2.lazyAccept(new C1(),new A2());
         a0C1.run();
@@ -86,6 +94,12 @@ class Consumer2Test {
         a1A2s.acceptArg1(A1::new).run();
         assertEquals("CM1:A1A2",cm1.getValConcat());
 
+        a1A2.uncurry().accept(new C1(),new A2());
+        assertEquals("CM1:C1A2",cm1.getValConcat());
+
+        a1A2s.uncurry().accept(new D1(),new A2());
+        assertEquals("CM1:D1A2",cm1.getValConcat());
+
     }
 
     @Test
@@ -95,6 +109,30 @@ class Consumer2Test {
         c2.accept(new A1(), new A2());
         assertEquals("CM1:A1A2",cm1.getValConcat());
         assertThrows(RuntimeException.class,()->c2.accept(null,new A2()));
+    }
+
+    @Test
+    public void throwingTest2() {
+        var cm1 = new ConsumerMethods1();
+        var c2 = Consumer2.throwing(cm1::c2E,(v1,v2,e)->{
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        });
+        c2.accept(new A1(),new A2());
+        assertEquals("CM1:A1A2",cm1.getValConcat());
+        assertThrows(RuntimeException.class,()->c2.accept(new A1(),null));
+    }
+
+    @Test
+    public void beforeAfterTest() {
+        var cm1 = new ConsumerMethods1();
+        var c = Consumer2.of(cm1::c2);
+        var c2 = c.before((aa,a2) -> {
+            System.out.println("Ready to consume " + aa+" and "+a2);
+        }).after((aa,a2) -> {
+            System.out.println("Successfully consumed " + aa+ " and "+a2);
+        });
+        c2.accept(new A1(),new A2());
     }
 
 }
