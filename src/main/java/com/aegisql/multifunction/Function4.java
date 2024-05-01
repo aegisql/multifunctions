@@ -11,16 +11,70 @@ import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
 
+/**
+ * The interface Function 4.
+ *
+ * @param <A1> the type parameter
+ * @param <A2> the type parameter
+ * @param <A3> the type parameter
+ * @param <A4> the type parameter
+ * @param <R>  the type parameter
+ */
 public interface Function4 <A1,A2,A3,A4,R> {
 
+    /**
+     * The interface Throwing.
+     *
+     * @param <A1> the type parameter
+     * @param <A2> the type parameter
+     * @param <A3> the type parameter
+     * @param <A4> the type parameter
+     * @param <R>  the type parameter
+     */
     @FunctionalInterface
-    interface Throwing<A1,A2,A3,A4,R>{ R apply(A1 a1,A2 a2,A3 a3,A4 a4) throws Exception; }
+    interface Throwing<A1,A2,A3,A4,R>{
+        /**
+         * Apply r.
+         *
+         * @param a1 the a 1
+         * @param a2 the a 2
+         * @param a3 the a 3
+         * @param a4 the a 4
+         * @return the r
+         * @throws Exception the exception
+         */
+        R apply(A1 a1,A2 a2,A3 a3,A4 a4) throws Exception; }
 
+    /**
+     * Apply r.
+     *
+     * @param a1 the a 1
+     * @param a2 the a 2
+     * @param a3 the a 3
+     * @param a4 the a 4
+     * @return the r
+     */
     R apply(A1 a1,A2 a2,A3 a3,A4 a4);
 
+    /**
+     * Lazy apply supplier ext.
+     *
+     * @param a1 the a 1
+     * @param a2 the a 2
+     * @param a3 the a 3
+     * @param a4 the a 4
+     * @return the supplier ext
+     */
     default SupplierExt<R> lazyApply(A1 a1,A2 a2,A3 a3,A4 a4) {
         return applyArg1(a1).applyArg1(a2).applyArg1(a3).applyArg1(a4);
     }
+
+    /**
+     * Apply arg 1 function 3.
+     *
+     * @param a1 the a 1
+     * @return the function 3
+     */
     default Function3<A2,A3,A4,R> applyArg1(A1 a1) {
     var f = this;
     return new Function3<>() {
@@ -35,7 +89,14 @@ public interface Function4 <A1,A2,A3,A4,R> {
         }
     };
 }
-default Function3<A2,A3,A4,R> applyArg1(Supplier<A1> a1Supplier) {
+
+    /**
+     * Apply arg 1 function 3.
+     *
+     * @param a1Supplier the a 1 supplier
+     * @return the function 3
+     */
+    default Function3<A2,A3,A4,R> applyArg1(Supplier<A1> a1Supplier) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -49,7 +110,14 @@ default Function3<A2,A3,A4,R> applyArg1(Supplier<A1> a1Supplier) {
         }
     };
 }
-default Function3<A1,A3,A4,R> applyArg2(A2 a2) {
+
+    /**
+     * Apply arg 2 function 3.
+     *
+     * @param a2 the a 2
+     * @return the function 3
+     */
+    default Function3<A1,A3,A4,R> applyArg2(A2 a2) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -63,7 +131,14 @@ default Function3<A1,A3,A4,R> applyArg2(A2 a2) {
         }
     };
 }
-default Function3<A1,A3,A4,R> applyArg2(Supplier<A2> a2Supplier) {
+
+    /**
+     * Apply arg 2 function 3.
+     *
+     * @param a2Supplier the a 2 supplier
+     * @return the function 3
+     */
+    default Function3<A1,A3,A4,R> applyArg2(Supplier<A2> a2Supplier) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -77,7 +152,14 @@ default Function3<A1,A3,A4,R> applyArg2(Supplier<A2> a2Supplier) {
         }
     };
 }
-default Function3<A1,A2,A4,R> applyArg3(A3 a3) {
+
+    /**
+     * Apply arg 3 function 3.
+     *
+     * @param a3 the a 3
+     * @return the function 3
+     */
+    default Function3<A1,A2,A4,R> applyArg3(A3 a3) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -91,7 +173,14 @@ default Function3<A1,A2,A4,R> applyArg3(A3 a3) {
         }
     };
 }
-default Function3<A1,A2,A4,R> applyArg3(Supplier<A3> a3Supplier) {
+
+    /**
+     * Apply arg 3 function 3.
+     *
+     * @param a3Supplier the a 3 supplier
+     * @return the function 3
+     */
+    default Function3<A1,A2,A4,R> applyArg3(Supplier<A3> a3Supplier) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -105,7 +194,14 @@ default Function3<A1,A2,A4,R> applyArg3(Supplier<A3> a3Supplier) {
         }
     };
 }
-default Function3<A1,A2,A3,R> applyArg4(A4 a4) {
+
+    /**
+     * Apply arg 4 function 3.
+     *
+     * @param a4 the a 4
+     * @return the function 3
+     */
+    default Function3<A1,A2,A3,R> applyArg4(A4 a4) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -119,7 +215,14 @@ default Function3<A1,A2,A3,R> applyArg4(A4 a4) {
         }
     };
 }
-default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
+
+    /**
+     * Apply arg 4 function 3.
+     *
+     * @param a4Supplier the a 4 supplier
+     * @return the function 3
+     */
+    default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
     var f = this;
     return new Function3<>() {
         @Override
@@ -134,11 +237,22 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
     };
 }
 
-    
+
+    /**
+     * Uncurry function 5.
+     *
+     * @param <X> the type parameter
+     * @return the function 5
+     */
     default <X> Function5<X,A1,A2,A3,A4,R> uncurry() {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
-    
+
+    /**
+     * Optional function 4.
+     *
+     * @return the function 4
+     */
     default Function4<A1,A2,A3,A4,Optional<R>> optional() {
         return (a1,a2,a3,a4)->{
             try {
@@ -149,10 +263,22 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
         };
     }
 
+    /**
+     * Or else function 4.
+     *
+     * @param defaultValue the default value
+     * @return the function 4
+     */
     default Function4<A1,A2,A3,A4,R> orElse(R defaultValue) {
         return orElse(()->defaultValue);
     }
 
+    /**
+     * Or else function 4.
+     *
+     * @param defaultValue the default value
+     * @return the function 4
+     */
     default Function4<A1,A2,A3,A4,R> orElse(Supplier<R> defaultValue) {
         return (a1,a2,a3,a4)->{
             try {
@@ -163,13 +289,25 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
         };
     }
 
+    /**
+     * Before function 4.
+     *
+     * @param before the before
+     * @return the function 4
+     */
     default Function4<A1,A2,A3,A4,R> before(Consumer4<A1,A2,A3,A4> before) {
         return (a1,a2,a3,a4)-> {
             before.accept(a1,a2,a3,a4);
             return apply(a1,a2,a3,a4);
         };
     }
-    
+
+    /**
+     * After function 4.
+     *
+     * @param after the after
+     * @return the function 4
+     */
     default Function4<A1,A2,A3,A4,R> after(Consumer5<A1,A2,A3,A4,R> after) {
         return (a1,a2,a3,a4)-> {
             var result = apply(a1,a2,a3,a4);
@@ -177,7 +315,19 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
             return result;
         };
     }
-    
+
+    /**
+     * Dispatch function 4.
+     *
+     * @param <A1>             the type parameter
+     * @param <A2>             the type parameter
+     * @param <A3>             the type parameter
+     * @param <A4>             the type parameter
+     * @param <R>              the type parameter
+     * @param dispatchFunction the dispatch function
+     * @param functions        the functions
+     * @return the function 4
+     */
     @SafeVarargs
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> dispatch(ToInt4Function<? super A1,? super A2,? super A3,? super A4> dispatchFunction, Function4<? super A1,? super A2,? super A3,? super A4,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function4 expects a dispatch function");
@@ -185,6 +335,19 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
         return (a1,a2,a3,a4) -> arrayValue(dispatchFunction.applyAsInt(a1,a2,a3,a4),finalFunctions).apply(a1,a2,a3,a4);
     }
 
+    /**
+     * Dispatch function 4.
+     *
+     * @param <A1>              the type parameter
+     * @param <A2>              the type parameter
+     * @param <A3>              the type parameter
+     * @param <A4>              the type parameter
+     * @param <R>               the type parameter
+     * @param dispatchPredicate the dispatch predicate
+     * @param function1         the function 1
+     * @param function2         the function 2
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> dispatch(Predicate4<? super A1,? super A2,? super A3,? super A4> dispatchPredicate, Function4<? super A1,? super A2,? super A3,? super A4,R> function1, Function4<? super A1,? super A2,? super A3,? super A4,R> function2) {
         requiresNotNullArgs(dispatchPredicate,function1,function2,"Function4");
         return (a1,a2,a3,a4) -> {
@@ -196,18 +359,65 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
         };
     }
 
+    /**
+     * Of function 4.
+     *
+     * @param <A1> the type parameter
+     * @param <A2> the type parameter
+     * @param <A3> the type parameter
+     * @param <A4> the type parameter
+     * @param <R>  the type parameter
+     * @param f    the f
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> of(Function4<A1,A2,A3,A4,R> f) {
         return f::apply;
     }
 
+    /**
+     * Throwing function 4.
+     *
+     * @param <A1> the type parameter
+     * @param <A2> the type parameter
+     * @param <A3> the type parameter
+     * @param <A4> the type parameter
+     * @param <R>  the type parameter
+     * @param f    the f
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> throwing(Throwing<A1,A2,A3,A4,R> f) {
         return throwing(f,"{0}; args:({1},{2},{3},{4})");
     }
 
+    /**
+     * Throwing function 4.
+     *
+     * @param <A1>   the type parameter
+     * @param <A2>   the type parameter
+     * @param <A3>   the type parameter
+     * @param <A4>   the type parameter
+     * @param <R>    the type parameter
+     * @param f      the f
+     * @param format the format
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> throwing(Throwing<A1,A2,A3,A4,R> f, String format) {
         return throwing(f,format,RuntimeException::new);
     }
 
+    /**
+     * Throwing function 4.
+     *
+     * @param <A1>             the type parameter
+     * @param <A2>             the type parameter
+     * @param <A3>             the type parameter
+     * @param <A4>             the type parameter
+     * @param <R>              the type parameter
+     * @param f                the f
+     * @param format           the format
+     * @param exceptionFactory the exception factory
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> throwing(Throwing<A1,A2,A3,A4,R> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
         return (a1,a2,a3,a4)->{
             try {
@@ -217,7 +427,19 @@ default Function3<A1,A2,A3,R> applyArg4(Supplier<A4> a4Supplier) {
             }
         };
     }
-    
+
+    /**
+     * Throwing function 4.
+     *
+     * @param <A1>           the type parameter
+     * @param <A2>           the type parameter
+     * @param <A3>           the type parameter
+     * @param <A4>           the type parameter
+     * @param <R>            the type parameter
+     * @param f              the f
+     * @param errorProcessor the error processor
+     * @return the function 4
+     */
     static <A1,A2,A3,A4,R> Function4<A1,A2,A3,A4,R> throwing(Throwing<A1,A2,A3,A4,R> f, Function5<? super Exception,A1,A2,A3,A4,R> errorProcessor) {
         return (a1,a2,a3,a4)->{
             try {

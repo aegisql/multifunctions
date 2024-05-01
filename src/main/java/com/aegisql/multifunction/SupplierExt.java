@@ -10,19 +10,54 @@ import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.handleException;
 
+/**
+ * The interface Supplier ext.
+ *
+ * @param <R> the type parameter
+ */
 public interface SupplierExt<R> extends Supplier<R> {
 
+    /**
+     * The interface Throwing.
+     *
+     * @param <A> the type parameter
+     */
     @FunctionalInterface
-    interface Throwing<A>{ A get() throws Exception; }
+    interface Throwing<A>{
+        /**
+         * Get a.
+         *
+         * @return the a
+         * @throws Exception the exception
+         */
+        A get() throws Exception; }
 
+    /**
+     * Transform supplier ext.
+     *
+     * @param <X> the type parameter
+     * @param f   the f
+     * @return the supplier ext
+     */
     default <X> SupplierExt<X> transform(Function1<? super R,? extends X> f) {
         return ()->f.apply(get());
     }
 
+    /**
+     * Uncurry function 1.
+     *
+     * @param <X> the type parameter
+     * @return the function 1
+     */
     default <X> Function1<X,R> uncurry() {
         throw new UnsupportedOperationException("Uncurrying is only possible for curryed functions");
     }
 
+    /**
+     * Optional supplier ext.
+     *
+     * @return the supplier ext
+     */
     default SupplierExt<Optional<R>> optional() {
         return ()->{
             try {
@@ -33,10 +68,22 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    /**
+     * Or else supplier ext.
+     *
+     * @param defaultValue the default value
+     * @return the supplier ext
+     */
     default SupplierExt<R> orElse(R defaultValue) {
         return orElse(()->defaultValue);
     }
 
+    /**
+     * Or else supplier ext.
+     *
+     * @param defaultValue the default value
+     * @return the supplier ext
+     */
     default SupplierExt<R> orElse(Supplier<R> defaultValue) {
         return ()->{
             try {
@@ -47,6 +94,12 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    /**
+     * Before supplier ext.
+     *
+     * @param before the before
+     * @return the supplier ext
+     */
     default SupplierExt<R> before(RunnableExt before) {
         return ()-> {
             before.run();
@@ -54,6 +107,12 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    /**
+     * After supplier ext.
+     *
+     * @param after the after
+     * @return the supplier ext
+     */
     default SupplierExt<R> after(Consumer1<R> after) {
         return ()-> {
             var result = this.get();
@@ -62,22 +121,60 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    /**
+     * Of supplier ext.
+     *
+     * @param <A>      the type parameter
+     * @param supplier the supplier
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> of(Supplier<A> supplier) {
         return supplier::get;
     }
 
+    /**
+     * Of const supplier ext.
+     *
+     * @param <A>   the type parameter
+     * @param value the value
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> ofConst(A value) {
         return ()->value;
     }
 
+    /**
+     * Throwing supplier ext.
+     *
+     * @param <A> the type parameter
+     * @param f   the f
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> throwing(Throwing<A> f) {
         return throwing(f,"{0}");
     }
 
+    /**
+     * Throwing supplier ext.
+     *
+     * @param <A>    the type parameter
+     * @param f      the f
+     * @param format the format
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> throwing(Throwing<A> f, String format) {
         return throwing(f,format,RuntimeException::new);
     }
 
+    /**
+     * Throwing supplier ext.
+     *
+     * @param <A>              the type parameter
+     * @param f                the f
+     * @param format           the format
+     * @param exceptionFactory the exception factory
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> throwing(Throwing<A> f, String format, Function2<String,Exception,? extends RuntimeException> exceptionFactory) {
         return ()->{
             try {
@@ -88,6 +185,14 @@ public interface SupplierExt<R> extends Supplier<R> {
         };
     }
 
+    /**
+     * Throwing supplier ext.
+     *
+     * @param <A>           the type parameter
+     * @param f             the f
+     * @param errorConsumer the error consumer
+     * @return the supplier ext
+     */
     static <A> SupplierExt<A> throwing(Throwing<A> f, Function1<? super Exception,A> errorConsumer) {
         return ()->{
             try {
