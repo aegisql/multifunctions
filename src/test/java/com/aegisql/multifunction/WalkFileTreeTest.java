@@ -14,7 +14,7 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 public class WalkFileTreeTest {
 
     @Test
-    public void valkTreeTest() {
+    public void walkTreeTest() {
 
         Function4<Path, Set<FileVisitOption>, Integer, FileVisitor<Path>, Path> fileTreeWalker = Function4.throwing(Files::walkFileTree);
 
