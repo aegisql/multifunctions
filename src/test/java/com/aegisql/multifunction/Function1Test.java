@@ -3,9 +3,6 @@ package com.aegisql.multifunction;
 import com.aegisql.multifunction.harness.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-import java.util.function.Function;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class Function1Test {
@@ -46,18 +43,18 @@ class Function1Test {
     @Test
     public void acceptTest() {
         var fm1 = new FunctionMethods1();
-        var f1 = Function1.of(fm1::f1);
+        var f1 = Function1.of(fm1::f1).andThen(s->s+"!!!");
 
         var a1A1 = f1.applyArg1(new A1());
         var a1B1 = f1.applyArg1(B1::new);
         var a0C1 = f1.lazyApply(new C1());
 
-        assertEquals("FM1:A1",a1A1.get());
-        assertEquals("FM1:B1",a1B1.get());
-        assertEquals("FM1:C1",a0C1.get());
+        assertEquals("FM1:A1!!!",a1A1.get());
+        assertEquals("FM1:B1!!!",a1B1.get());
+        assertEquals("FM1:C1!!!",a0C1.get());
 
         Function1<Object, String> restoredFunction = a1A1.uncurry(); //this works
-        assertEquals("FM1:A1", restoredFunction.apply(new A1()));
+        assertEquals("FM1:A1!!!", restoredFunction.apply(new A1()));
         assertThrows(ClassCastException.class,()->restoredFunction.apply(""));
 
         SupplierExt<String> wrap = SupplierExt.of(a1A1);

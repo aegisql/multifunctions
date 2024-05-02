@@ -23,9 +23,9 @@ class Function2Test {
 
     @Test
     void lazyApply() {
-        Function2<AA, A2, String> f = Function2.of(fm1::f2);
+        Function2<AA, A2, String> f = Function2.of(fm1::f2).andThen(s->s+"!!!");
         SupplierExt<String> s = f.lazyApply(new A1(), new A2());
-        assertEquals("FM1:A1A2",s.get());
+        assertEquals("FM1:A1A2!!!",s.get());
     }
 
     @Test
