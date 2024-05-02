@@ -7,6 +7,7 @@ package com.aegisql.multifunction;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
@@ -579,6 +580,27 @@ public interface Function10 <A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> {
     }
 
     /**
+     * And then function 10.
+     *
+     * @param <R2>  the type parameter
+     * @param after the after
+     * @return the function 10
+     */
+/*
+    default Function10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> after(Consumer11<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> after) {
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)-> {
+            var result = apply(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
+            after.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,result);
+            return result;
+        };
+    }
+    */
+    default <R2> Function10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R2> andThen(Function<? super R, ? extends R2> after) {
+        Objects.requireNonNull(after);
+        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10) -> after.apply(apply(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10));
+    }
+
+    /**
      * Dispatch function 10.
      *
      * @param <A1>             the type parameter
@@ -596,15 +618,6 @@ public interface Function10 <A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> {
      * @param functions        the functions
      * @return the function 10
      */
-/*
-    default Function10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> after(Consumer11<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> after) {
-        return (a1,a2,a3,a4,a5,a6,a7,a8,a9,a10)-> {
-            var result = apply(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
-            after.accept(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,result);
-            return result;
-        };
-    }
-    */
     @SafeVarargs
     static <A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> Function10<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,R> dispatch(ToInt10Function<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10> dispatchFunction, Function10<? super A1,? super A2,? super A3,? super A4,? super A5,? super A6,? super A7,? super A8,? super A9,? super A10,R>... functions) {
         Objects.requireNonNull(dispatchFunction,"Function10 expects a dispatch function");

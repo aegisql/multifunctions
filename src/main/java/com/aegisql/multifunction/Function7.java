@@ -7,6 +7,7 @@ package com.aegisql.multifunction;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
@@ -455,6 +456,18 @@ public interface Function7 <A1,A2,A3,A4,A5,A6,A7,R> {
             after.accept(a1,a2,a3,a4,a5,a6,a7,result);
             return result;
         };
+    }
+
+    /**
+     * And then function 7.
+     *
+     * @param <R2>  the type parameter
+     * @param after the after
+     * @return the function 7
+     */
+    default <R2> Function7<A1,A2,A3,A4,A5,A6,A7,R2> andThen(Function<? super R, ? extends R2> after) {
+        Objects.requireNonNull(after);
+        return (a1,a2,a3,a4,a5,a6,a7) -> after.apply(apply(a1,a2,a3,a4,a5,a6,a7));
     }
 
     /**

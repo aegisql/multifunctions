@@ -30,6 +30,7 @@ package com.aegisql.multifunction.tmp;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
@@ -89,6 +90,11 @@ public interface Function\{fN} <\{types(fN)},R> {
         };
     }
     \{isLast ? "*/":""}
+    default <R2> \{className}<\{types(fN)},R2> andThen(Function<? super R, ? extends R2> after) {
+        Objects.requireNonNull(after);
+        return (\{args(fN)}) -> after.apply(apply(\{args(fN)}));
+    }
+
     @SafeVarargs
     static <\{types(fN)},R> \{className}<\{types(fN)},R> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)},R>... functions) {
         Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");

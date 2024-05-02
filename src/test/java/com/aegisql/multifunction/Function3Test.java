@@ -21,9 +21,9 @@ class Function3Test {
 
     @Test
     void lazyApply() {
-        Function3<AA, A2, A3,String> f = Function3.of(fm1::f3);
+        Function3<AA, A2, A3,String> f = Function3.of(fm1::f3).andThen(s->s+"!!!");
         SupplierExt<String> s = f.lazyApply(new A1(), new A2(), new A3());
-        assertEquals("FM1:A1A2A3",s.get());
+        assertEquals("FM1:A1A2A3!!!",s.get());
     }
 
     @Test
