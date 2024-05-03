@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
 
+@FunctionalInterface
 public interface Consumer\{fN} <\{types(fN)}> {
 
     @FunctionalInterface

@@ -35,6 +35,7 @@ import java.util.function.Supplier;
 
 import static com.aegisql.multifunction.Utils.*;
 
+@FunctionalInterface
 public interface Function\{fN} <\{types(fN)},R> {
 
     @FunctionalInterface
