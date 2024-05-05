@@ -21,6 +21,7 @@ import static com.aegisql.multifunction.Utils.*;
  * @param <A6> the type parameter
  * @param <A7> the type parameter
  */
+@FunctionalInterface
 public interface Consumer7 <A1,A2,A3,A4,A5,A6,A7> {
 
     /**
