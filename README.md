@@ -10,3 +10,5 @@ Requires Java 21
     <version>1.1</version>
 </dependency>
 ```
+
+Short [Tutorial](https://github.com/aegisql/multifunctions/wiki)
