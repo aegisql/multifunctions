@@ -33,7 +33,7 @@ class SupplierExtTest {
 
         SupplierExt<String> transform = value.transform(v -> v + "!");
         assertEquals("VALUE!",transform.get());
-
+        assertEquals(0,value.arity());
     }
 
     @Test

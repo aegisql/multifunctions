@@ -59,6 +59,7 @@ class Consumer2Test {
     public void acceptTest() {
         var cm1 = new ConsumerMethods1();
         var c2 = Consumer2.of(cm1::c2);
+        assertEquals(2,c2.arity());
 
         assertThrows(RuntimeException.class, c2::uncurry);
 

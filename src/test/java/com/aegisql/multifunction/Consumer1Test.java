@@ -59,6 +59,8 @@ class Consumer1Test {
     public void acceptTest() {
         var cm1 = new ConsumerMethods1();
         var c1 = Consumer1.of(cm1::c1);
+        assertEquals(1,c1.arity());
+
 
         var a1A1 = c1.acceptArg1(new A1());
         var a1B1 = c1.acceptArg1(B1::new);

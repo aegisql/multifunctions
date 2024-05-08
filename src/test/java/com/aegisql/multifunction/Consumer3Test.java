@@ -23,6 +23,8 @@ class Consumer3Test {
     @Test
     void accept() {
         var c = Consumer3.of(cm1::c3);
+        assertEquals(3,c.arity());
+
         c.accept(new A1(),new A2(),new A3());
         cm1.assertValConcat("CM1:A1A2A3");
     }

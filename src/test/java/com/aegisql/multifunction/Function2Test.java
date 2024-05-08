@@ -26,6 +26,8 @@ class Function2Test {
         Function2<AA, A2, String> f = Function2.of(fm1::f2).andThen(s->s+"!!!");
         SupplierExt<String> s = f.lazyApply(new A1(), new A2());
         assertEquals("FM1:A1A2!!!",s.get());
+        assertEquals(2,f.arity());
+
     }
 
     @Test

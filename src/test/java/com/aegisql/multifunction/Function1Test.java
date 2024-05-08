@@ -44,6 +44,8 @@ class Function1Test {
     public void acceptTest() {
         var fm1 = new FunctionMethods1();
         var f1 = Function1.of(fm1::f1).andThen(s->s+"!!!");
+        assertEquals(1,f1.arity());
+
 
         var a1A1 = f1.applyArg1(new A1());
         var a1B1 = f1.applyArg1(B1::new);

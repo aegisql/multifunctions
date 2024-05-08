@@ -21,6 +21,7 @@ class RunnableExtTest {
         var r = RunnableExt.of(() -> {
             System.out.println("RUN!");
         });
+        assertEquals(0,r.arity());
         r.run();
     }
 
