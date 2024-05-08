@@ -182,6 +182,13 @@ public interface Function2 <A1,A2,R> extends BiFunction<A1,A2,R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 2; }
+
+    /**
      * Dispatch function 2.
      *
      * @param <A1>             the type parameter

@@ -271,6 +271,13 @@ public interface Consumer4 <A1,A2,A3,A4> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 4; }
+
+    /**
      * Dispatch consumer 4.
      *
      * @param <A1>             the type parameter

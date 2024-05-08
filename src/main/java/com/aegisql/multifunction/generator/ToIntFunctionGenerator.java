@@ -9,9 +9,9 @@ import static com.aegisql.multifunction.generator.ArgUtils.*;
 
 public class ToIntFunctionGenerator {
 
-    private static void generate(int functionNumber) {
+    private static void generate(int fN) {
 
-        String className = "ToInt"+functionNumber+"Function";
+        String className = "ToInt"+fN+"Function";
 
         String code = STR."""
 /**
@@ -21,8 +21,9 @@ public class ToIntFunctionGenerator {
  */
 package com.aegisql.multifunction.tmp;
 @FunctionalInterface
-public interface \{className}<\{types(functionNumber)}> {
-    int applyAsInt(\{typedArgs(functionNumber).toString()});
+public interface \{className}<\{types(fN)}> {
+    int applyAsInt(\{typedArgs(fN).toString()});
+    default int arity() { return \{fN}; }
 }                
                 """;
 

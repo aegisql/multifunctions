@@ -184,6 +184,13 @@ public interface Function1 <A1,R> extends Function<A1,R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 1; }
+
+    /**
      * Dispatch function.
      *
      * @param <A1>             the type parameter

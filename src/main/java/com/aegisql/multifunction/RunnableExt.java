@@ -61,6 +61,13 @@ public interface RunnableExt extends Runnable {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 0; }
+
+    /**
      * Of runnable ext.
      *
      * @param runnable the runnable

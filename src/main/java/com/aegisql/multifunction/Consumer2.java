@@ -170,6 +170,13 @@ public interface Consumer2<A1,A2> extends BiConsumer<A1,A2> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 2; }
+
+    /**
      * Dispatch consumer 2.
      *
      * @param <A1>             the type parameter

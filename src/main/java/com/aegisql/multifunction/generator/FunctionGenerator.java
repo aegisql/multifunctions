@@ -96,6 +96,8 @@ public interface Function\{fN} <\{types(fN)},R> {
         return (\{args(fN)}) -> after.apply(apply(\{args(fN)}));
     }
 
+    default int arity() { return \{fN}; }
+
     @SafeVarargs
     static <\{types(fN)},R> \{className}<\{types(fN)},R> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)},R>... functions) {
         Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");

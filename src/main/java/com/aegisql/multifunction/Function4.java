@@ -331,6 +331,13 @@ public interface Function4 <A1,A2,A3,A4,R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 4; }
+
+    /**
      * Dispatch function 4.
      *
      * @param <A1>             the type parameter

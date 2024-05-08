@@ -7,7 +7,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -24,24 +24,24 @@ public class WalkFileTreeTest {
 
     public static final SupplierExt<Function1<String,Long>> NEW_COUNTING_SHALLOW_FILE_TREE_WALKER = ()->{
         var visitor = new SizeCountingFileVisitor();
-        var sizeCountingWalker = SHALLOW_FILE_TREE_WALKER.applyArg2(visitor);
-        var walker = PATH_OF.andThen(sizeCountingWalker);
-        return walker.andThen(_ -> visitor.getCollectedSize());
+        return PATH_OF
+                .andThen(SHALLOW_FILE_TREE_WALKER.applyArg2(visitor))
+                .andThen(_ -> visitor.getCollectedSize());
     };
 
     public static final SupplierExt<Function1<String,Long>> NEW_COUNTING_DEEP_FILE_TREE_WALKER = ()->{
         var visitor = new SizeCountingFileVisitor();
-        var sizeCountingWalker = DEEP_NO_FOLLOW_LINKS_FILE_TREE_WALKER.applyArg2(visitor);
-        var walker = PATH_OF.andThen(sizeCountingWalker);
-        return walker.andThen(_ -> visitor.getCollectedSize());
+        return PATH_OF
+                .andThen(DEEP_NO_FOLLOW_LINKS_FILE_TREE_WALKER.applyArg2(visitor))
+                .andThen(_ -> visitor.getCollectedSize());
     };
 
     public static class SizeCountingFileVisitor extends SimpleFileVisitor<Path> {
-        private final AtomicLong counter = new AtomicLong();
-        public long getCollectedSize() {return counter.get();}
+        private final LongAdder counter = new LongAdder();
+        public long getCollectedSize() {return counter.longValue();}
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            counter.addAndGet(attrs.size());
+            counter.add(attrs.size());
             return CONTINUE;
         }
     }

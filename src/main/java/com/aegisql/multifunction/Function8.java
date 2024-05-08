@@ -519,6 +519,13 @@ public interface Function8 <A1,A2,A3,A4,A5,A6,A7,A8,R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 8; }
+
+    /**
      * Dispatch function 8.
      *
      * @param <A1>             the type parameter

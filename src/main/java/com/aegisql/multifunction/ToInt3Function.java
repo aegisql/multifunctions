@@ -23,4 +23,11 @@ public interface ToInt3Function<A1,A2,A3> {
      * @return the int
      */
     int applyAsInt(A1 a1,A2 a2,A3 a3);
+
+    /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 3; }
 }

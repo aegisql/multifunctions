@@ -124,6 +124,13 @@ public interface Consumer1<A1> extends Consumer<A1> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 1; }
+
+    /**
      * Dispatch consumer 1.
      *
      * @param <A1>             the type parameter

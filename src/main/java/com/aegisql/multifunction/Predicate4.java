@@ -58,4 +58,11 @@ public interface Predicate4<A1,A2,A3,A4> {
         Objects.requireNonNull(other);
         return (a1,a2,a3,a4) -> test(a1,a2,a3,a4) || other.test(a1,a2,a3,a4);
     }
+
+    /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 4; }
 }

@@ -64,6 +64,8 @@ public interface Consumer\{fN} <\{types(fN)}> {
         };
     }
 
+    default int arity() { return \{fN}; }
+
     @SafeVarargs
     static <\{types(fN)}> \{className}<\{types(fN)}> dispatch(ToInt\{fN}Function<\{superTypes(fN)}> dispatchFunction, \{className}<\{superTypes(fN)}>... functions) {
         Objects.requireNonNull(dispatchFunction,"\{className} expects a dispatch function");

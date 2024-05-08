@@ -566,6 +566,13 @@ public interface Function9 <A1,A2,A3,A4,A5,A6,A7,A8,A9,R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 9; }
+
+    /**
      * Dispatch function 9.
      *
      * @param <A1>             the type parameter

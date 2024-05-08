@@ -122,6 +122,13 @@ public interface SupplierExt<R> extends Supplier<R> {
     }
 
     /**
+     * Arity int.
+     *
+     * @return the int
+     */
+    default int arity() { return 0; }
+
+    /**
      * Of supplier ext.
      *
      * @param <A>      the type parameter
